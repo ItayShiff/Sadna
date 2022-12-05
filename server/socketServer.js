@@ -51,7 +51,7 @@ module.exports = function (server) {
             socket.join(socket.id);
 
             console.log(roomsList[socket.id]);
-
+            
             socket.emit('createdRoomSuccessfully', roomsList[socket.id]);
         })
 
