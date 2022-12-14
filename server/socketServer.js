@@ -87,5 +87,9 @@ module.exports = function (server) {
       // Remove the user from the room
       socket.leave(uniqueRoomIdentifier);
     });
+
+    socket.on("startGame", (uniqueRoomIdentifier, randomWordsToSend) => {
+      io.in(uniqueRoomIdentifier).emit("gameStarted", randomWordsToSend);
+    });
   });
 };
