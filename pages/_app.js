@@ -1,14 +1,8 @@
-import '../styles/globals.css'
-import socket from '../components/socketio/socket'
-import { useEffect } from 'react'
+import "../styles/globals.css";
+import socket from "../components/socketio/socket";
 
 function MyApp({ Component, pageProps }) {
-
-  useEffect(() => {
-    socket.emit('letEveryoneKnowIjoined')
-  }, [])
-  
-  return <Component {...pageProps} socket={socket} />
+  return <Component {...pageProps} socket={socket} />;
 }
 
-export default MyApp
+export default MyApp;

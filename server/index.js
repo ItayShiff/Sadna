@@ -2,8 +2,6 @@
 const express = require("express");
 const next = require("next");
 
-const { SingletonRoomsList } = require("./SingletonRoomsList.js")
-
 const { join } = require('path')
 const { parse } = require('url')
 

@@ -1,23 +1,22 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/router'
+import Head from "next/head";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 
 export default function Home({ socket }) {
-  const router = useRouter()
+  const router = useRouter();
 
   useEffect(() => {
-    socket.on('createdRoomSuccessfully', (room) => {
-
+    socket.on("createdRoomSuccessfully", (room) => {
       // console.log(room);
       router.push(`/room/${room.users[0].id}`);
-    })
-  }, [])
-  
+    });
+  }, []);
+
   const createRoom = () => {
-    socket.emit('createRoom');
-  }
+    socket.emit("createRoom");
+  };
 
   return (
     <div>
@@ -27,13 +26,18 @@ export default function Home({ socket }) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-
       <main>
         <div className="title">
-          <div>
-            Sadna Game
-          </div>
+          <div>Sadna Game</div>
         </div>
+
+        {/* <Image
+          src="/edit.png"
+          alt="Picture of the author"
+          width={25}
+          height={25}
+          <input type="text" ref={author} defaultValue={editedPRinfo.author} /> 
+        /> */}
 
         <button onClick={() => createRoom()}>Create room</button>
       </main>
@@ -42,13 +46,13 @@ export default function Home({ socket }) {
         <Link href="/daniel">Go to daniel page</Link>
       </footer>
       <style jsx>{`
-				.title {
-					color: red;
+        .title {
+          color: red;
           font-weight: bold;
           text-align: center;
           background-color: cyan;
-				}
-        `}</style>
+        }
+      `}</style>
     </div>
-  )
+  );
 }
