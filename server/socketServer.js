@@ -162,5 +162,9 @@ module.exports = function (server) {
         io.in(uniqueRoomIdentifier).emit("winners", winnersData);
       }
     });
+
+    socket.on("messageSentInChat", (uniqueRoomIdentifier, nickname, message) => {
+      io.in(uniqueRoomIdentifier).emit("messageArrivedInChat", { sender: nickname, message: message });
+    });
   });
 };

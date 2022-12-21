@@ -125,6 +125,9 @@ function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoom
   const userVotedAlready = useRef(false);
   const [winnersData, setWinnersData] = useState([]);
 
+  const [chatMessages, setChatMessages] = useState([]);
+  const chatInput = useRef();
+
   useEffect(() => {
     if (roomExisting === false) {
       return;
@@ -203,6 +206,33 @@ function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoom
     });
   }, [winnersData]);
 
+  useEffect(() => {
+    socket.on("messageArrivedInChat", (messageData) => {
+      // Keep only the last 20 messages
+      // let initialNumberToCopy = chatMessages.length - 20;
+      // if (initialNumberToCopy < 0) {
+      //   initialNumberToCopy = 0;
+      // }
+
+      // let copiedChatMessages = [];
+      // for (let i = initialNumberToCopy; initialNumberToCopy < chatMessages.length; i++) {
+      //   copiedChatMessages[i - initialNumberToCopy] = chatMessages[i];
+      // }
+
+      const copiedChatMessages = [...chatMessages];
+      copiedChatMessages.push(messageData);
+      setChatMessages(copiedChatMessages);
+    });
+
+    console.log("okay new");
+    const element = document.getElementById("chatMessagesContainer");
+    element.scrollTo(0, element.scrollHeight);
+
+    return () => {
+      socket.off("messageArrivedInChat");
+    };
+  }, [chatMessages]);
+
   const sendMessageToServerLeftRoom = () => {
     socket.emit("leftRoom", uniqueRoomIdentifier);
   };
@@ -257,7 +287,6 @@ function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoom
     userPickedAnImageAlready.current = true;
     console.log("CLICKED AN IMAGE", indexOfImage);
     document.getElementById("imagesWrapper").children[indexOfImage].classList.add("pickedThisImage");
-    // document.getElementById("imagesWrapper").children[indexOfImage].style.border = "10px solid red";
     socket.emit("imagePicked", uniqueRoomIdentifier, images[indexOfImage]);
   };
 
@@ -278,12 +307,9 @@ function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoom
     userVotedAlready.current = true;
 
     document.getElementById("imagesWrapper").children[indexOfImage].classList.add("pickedThisImage");
-    // document.getElementById("imagesWrapper").children[indexOfImage].style.border = "10px solid red";
 
     socket.emit("voteForWinningPhoto", uniqueRoomIdentifier, imageSubmissions[indexOfImage].userThatPicked.id);
   };
-
-  // console.log("Random words", listOfRandomWordsToBeShown);
 
   const getProperPhotoRoundScore = (uniqueIDofUserThatSubmittedThisImage) => {
     const IDofUserInUsersList = users.findIndex((currentUser) => currentUser.id === uniqueIDofUserThatSubmittedThisImage);
@@ -295,10 +321,29 @@ function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoom
     return users[IDofUserInUsersList].nickname ?? `Guest ${IDofUserInUsersList + 1}`;
   };
 
+  const sendMessageInChat = () => {
+    if (chatInput.current.value && chatInput.current.value !== "") {
+      socket.emit(
+        "messageSentInChat",
+        uniqueRoomIdentifier,
+        localStorage.getItem("nickname") ?? "Guest",
+        chatInput.current.value
+      );
+
+      chatInput.current.value = "";
+    }
+  };
+
+  const detectEnterForSending = (event) => {
+    if (event.key === "Enter") {
+      sendMessageInChat();
+    }
+  };
+
   return (
     <div>
       <Head>
-        <title>{uniqueRoomIdentifier}</title>
+        <title>{users[0].nickname ? `${users[0].nickname}'s room` : "Guest's room"}</title>
       </Head>
       <div>The name of the uniqueRoomIdentifier: {uniqueRoomIdentifier}</div>
       <div id="roomNameContainer">
@@ -387,7 +432,47 @@ function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoom
         </div>
       )}
 
+      <div id="chatContainer">
+        <div id="chatMessagesContainer">
+          {chatMessages.map((messageData, index) => (
+            <div key={index} className="messageInChat">
+              <b>{messageData.sender}</b>: {messageData.message}
+            </div>
+          ))}
+        </div>
+
+        <div id="inputSendChatWrapper">
+          <input ref={chatInput} placeholder="Enter text message" onKeyDown={detectEnterForSending} />
+          <button onClick={sendMessageInChat}> {`>`} </button>
+        </div>
+      </div>
       <style jsx>{`
+        #chatContainer {
+          height: 200px;
+          width: 50%;
+          margin: 15px auto;
+          border: 1px solid black;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          background: #eeeeee;
+        }
+        #chatContainer input {
+          width: 100%;
+          padding: 0px 10px;
+        }
+        #chatMessagesContainer {
+          height: 100%;
+          overflow-x: hidden;
+          padding-bottom: 5px;
+        }
+
+        .messageInChat {
+          padding: 0px 10px;
+        }
+        #inputSendChatWrapper {
+          display: flex;
+        }
         #winnersWrapper {
           background: #eaeaea;
           text-align: center;
