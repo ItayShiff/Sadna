@@ -1337,9 +1337,12 @@ function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoom
   const input = useRef();
 
   const [images, setImages] = useState([]);
-  const [imageSubmissions, setImageSubmissions] = useState([]); // Data of each item is {  userThatPicked: socket.id, image: imagePicked, };
+  const [imageSubmissions, setImageSubmissions] = useState([]); // Data of each item is { userThatPicked: socket.id, image: imagePicked, };
+  const [allUsersSubmittedImage, setAllUsersSubmittedImage] = useState(false);
+  const [allUsersVoted, setAllUsersVoted] = useState(false);
 
-  const [userPickedAnImageAlready, setUserPickedAnImageAlready] = useState(false);
+  const userPickedAnImageAlready = useRef(false);
+  const userVotedAlready = useRef(false);
 
   useEffect(() => {
     if (roomExisting === false) {
@@ -1359,6 +1362,16 @@ function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoom
     });
 
     console.log("Image submissions ", imageSubmissions);
+
+    socket.on("allUsersSubmittedImage", () => {
+      setAllUsersSubmittedImage(true);
+    });
+
+    socket.on("allUsersVoted", (updatedUsersList) => {
+      setUsers(updatedUsersList);
+      setAllUsersVoted(true);
+      console.log("All users voted", updatedUsersList);
+    });
 
     // When user about to leave the room (using Esc or full reload) so it will run
     window.addEventListener("beforeunload", sendMessageToServerLeftRoom);
@@ -1431,17 +1444,50 @@ function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoom
     }
   };
 
-  const imageClicked = (indexOfImage) => {
-    if (userPickedAnImageAlready === true) {
+  const clickSubmitImage = (indexOfImage) => {
+    if (userPickedAnImageAlready.current === true) {
+      alert("You submitted already an image");
       return;
     }
 
-    setUserPickedAnImageAlready(true);
+    userPickedAnImageAlready.current = true;
     console.log("CLICKED AN IMAGE", indexOfImage);
+    document.getElementById("imagesWrapper").children[indexOfImage].style.border = "10px solid red";
     socket.emit("imagePicked", uniqueRoomIdentifier, images[indexOfImage]);
   };
 
+  const clickVoteForWinningPhoto = (indexOfImage) => {
+    if (userVotedAlready.current === true) {
+      alert("You submitted voted");
+      return;
+    }
+
+    const IDofOwnerWhosePhotoIVoted = imageSubmissions.findIndex(
+      (submissionData) => submissionData.userThatPicked.id === socket.id
+    );
+    if (indexOfImage === IDofOwnerWhosePhotoIVoted) {
+      alert("You cannot choose your own submission.");
+      return;
+    }
+
+    userVotedAlready.current = true;
+
+    document.getElementById("imagesWrapper").children[indexOfImage].style.border = "10px solid red";
+
+    socket.emit("voteForWinningPhoto", uniqueRoomIdentifier, imageSubmissions[indexOfImage].userThatPicked.id);
+  };
+
   // console.log("Random words", listOfRandomWordsToBeShown);
+
+  const getProperPhotoRoundScore = (uniqueIDofUserThatSubmittedThisImage) => {
+    const IDofUserInUsersList = users.findIndex((currentUser) => currentUser.id === uniqueIDofUserThatSubmittedThisImage);
+    return users[IDofUserInUsersList].roundScore;
+  };
+
+  const getProperPhotoSubmitter = (uniqueIDofUserThatSubmittedThisImage) => {
+    const IDofUserInUsersList = users.findIndex((currentUser) => currentUser.id === uniqueIDofUserThatSubmittedThisImage);
+    return users[IDofUserInUsersList].id;
+  };
 
   return (
     <div>
@@ -1477,19 +1523,45 @@ function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoom
             ))}
           </div>
 
-          <input ref={input} />
-          <button onClick={submitInput}>SUBMIT</button>
+          {allUsersSubmittedImage === false ? (
+            // Submission phase
+            <React.Fragment>
+              <input ref={input} />
+              <button onClick={submitInput}>SUBMIT</button>
 
-          <div id="imagesWrapper">
-            {images.map((image, index) => (
-              <img
-                key={index}
-                className="image"
-                src={`data:image/png;base64,${image}`}
-                onClick={() => imageClicked(index)}
-              />
-            ))}
-          </div>
+              <div id="imagesWrapper">
+                {images.map((image, index) => (
+                  <img
+                    key={index}
+                    className="image"
+                    src={`data:image/png;base64,${image}`}
+                    onClick={() => clickSubmitImage(index)}
+                  />
+                ))}
+              </div>
+            </React.Fragment>
+          ) : (
+            // Vote phase
+            <div id="imagesWrapper">
+              {imageSubmissions.map((submissionData, indexOfSubmittedImage) => (
+                <div className="specificImageToVoteForContainer">
+                  {allUsersVoted === true && (
+                    <div>
+                      <div>{getProperPhotoSubmitter(submissionData.userThatPicked.id)}</div>
+                      <div>{getProperPhotoRoundScore(submissionData.userThatPicked.id)}</div>
+                    </div>
+                  )}
+
+                  <img
+                    key={indexOfSubmittedImage}
+                    className="image"
+                    src={`data:image/png;base64,${submissionData.imagePicked}`}
+                    onClick={() => clickVoteForWinningPhoto(indexOfSubmittedImage)}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -1497,15 +1569,30 @@ function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoom
         #imagesWrapper {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          grid-gap: 10px;
+          grid-gap: 20px;
         }
         #imagesWrapper img {
           height: 100%;
-          width: 300px;
+          width: 100%;
           border: 10px solid #fff500;
           margin: 0 auto;
           cursor: pointer;
         }
+        .specificImageToVoteForContainer {
+          position: relative;
+        }
+        .specificImageToVoteForContainer > div {
+          background: #c5c5c5e6;
+          position: absolute;
+          left: calc(50% + 10px);
+          top: 50%;
+          transform: translate(-50%, -50%);
+          padding: 20px;
+          width: calc(100% - 39px);
+          text-align: center;
+          font-weight: bold;
+        }
+
         #roomNameContainer {
           display: flex;
           justify-content: center;

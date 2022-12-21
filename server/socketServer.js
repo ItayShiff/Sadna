@@ -1260,6 +1260,9 @@ module.exports = function (server) {
         users: [
           {
             id: socket.id,
+            pickedImage: false,
+            voted: false,
+            roundScore: 0,
           },
         ],
       };
@@ -1281,6 +1284,9 @@ module.exports = function (server) {
         if (roomsList[uniqueRoomIdentifier].users[0].id !== socket.id) {
           roomsList[uniqueRoomIdentifier].users.push({
             id: socket.id,
+            pickedImage: false,
+            voted: false,
+            roundScore: 0,
           });
         }
 
@@ -1319,9 +1325,50 @@ module.exports = function (server) {
         image: imagePicked,
       };
 
+      const indexOfUserThatPickedImage = roomsList[uniqueRoomIdentifier].users.findIndex(
+        (current) => current.id === socket.id
+      );
+
+      roomsList[uniqueRoomIdentifier].users[indexOfUserThatPickedImage].pickedImage = true;
+
       console.log("about to send this data to client");
 
       io.in(uniqueRoomIdentifier).emit("userSubmittedImage", res); // 2nd parameter = the user who picked the image
+
+      let numberOfUsersThePickedImage = 0;
+      for (let i = 0; i < roomsList[uniqueRoomIdentifier].users.length; i++) {
+        if (roomsList[uniqueRoomIdentifier].users[i].pickedImage === true) {
+          numberOfUsersThePickedImage++;
+        }
+      }
+
+      // If all users submitted image
+      if (numberOfUsersThePickedImage === roomsList[uniqueRoomIdentifier].users.length) {
+        io.in(uniqueRoomIdentifier).emit("allUsersSubmittedImage");
+      }
+    });
+
+    socket.on("voteForWinningPhoto", (uniqueRoomIdentifier, uniqueIDofUserThatSubmittedThisImage) => {
+      const indexOfMe = roomsList[uniqueRoomIdentifier].users.findIndex((current) => current.id === socket.id);
+      roomsList[uniqueRoomIdentifier].users[indexOfMe].voted = true;
+
+      const indexOfUserWhosePhotoPicked = roomsList[uniqueRoomIdentifier].users.findIndex(
+        (current) => current.id === uniqueIDofUserThatSubmittedThisImage
+      );
+      roomsList[uniqueRoomIdentifier].users[indexOfUserWhosePhotoPicked].roundScore++;
+
+      // Detect if all users voted
+      let numberOfUsersThatVoted = 0;
+      for (let i = 0; i < roomsList[uniqueRoomIdentifier].users.length; i++) {
+        if (roomsList[uniqueRoomIdentifier].users[i].voted === true) {
+          numberOfUsersThatVoted++;
+        }
+      }
+
+      // if all users voted
+      if (numberOfUsersThatVoted === roomsList[uniqueRoomIdentifier].users.length) {
+        io.in(uniqueRoomIdentifier).emit("allUsersVoted", roomsList[uniqueRoomIdentifier].users); // Updated users array with roundScore of each user
+      }
     });
   });
 };
