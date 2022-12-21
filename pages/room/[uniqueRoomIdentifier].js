@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
 import socket from "../../components/socketio/socket";
+import Head from "next/head";
 
 const nouns = [
   "cat",
@@ -130,9 +131,11 @@ function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoom
     }
 
     console.log("Room existing");
-    socket.emit("joinedRoom", uniqueRoomIdentifier);
+
+    socket.emit("joinedRoom", uniqueRoomIdentifier, localStorage.getItem("nickname"));
 
     socket.on("updatedRoom", (updatedRoom) => {
+      console.log(updatedRoom.users);
       setUsers(updatedRoom.users);
     });
 
@@ -289,11 +292,14 @@ function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoom
 
   const getProperPhotoSubmitter = (uniqueIDofUserThatSubmittedThisImage) => {
     const IDofUserInUsersList = users.findIndex((currentUser) => currentUser.id === uniqueIDofUserThatSubmittedThisImage);
-    return users[IDofUserInUsersList].id;
+    return users[IDofUserInUsersList].nickname ?? `Guest ${IDofUserInUsersList + 1}`;
   };
 
   return (
     <div>
+      <Head>
+        <title>{uniqueRoomIdentifier}</title>
+      </Head>
       <div>The name of the uniqueRoomIdentifier: {uniqueRoomIdentifier}</div>
       <div id="roomNameContainer">
         <div id="roomName">{roomName}</div>
@@ -305,12 +311,14 @@ function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoom
       <div id="usersListContainer">
         {users.map((currentUser, index) => (
           <div key={currentUser.id}>
-            Guest {index + 1} (unique id: {currentUser.id})
+            {currentUser.nickname ?? <span>Guest {index + 1}</span>} (unique id: {currentUser.id})
           </div>
         ))}
       </div>
       {imageSubmissions.map((submissionData, index) => (
-        <div key={submissionData.userThatPicked.id}>{submissionData.userThatPicked.id} picked an image</div>
+        <div key={submissionData.userThatPicked.id}>
+          {submissionData.userThatPicked.nickname ?? <span>Guest {index + 1}</span>} picked an image
+        </div>
       ))}
 
       {roundStarted === false ? (
@@ -331,7 +339,7 @@ function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoom
             <div id="winnersWrapper">
               <div>Winners:</div>
               {winnersData.map((winner) => (
-                <div key={winner.id}>{winner.id}</div>
+                <div key={winner.id}>{winner.nickname}</div>
               ))}
             </div>
           )}

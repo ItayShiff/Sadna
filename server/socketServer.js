@@ -18,7 +18,7 @@ module.exports = function (server) {
     //     io.emit('totalCountInWholeWebsite', io.engine.clientsCount);
     // });
 
-    socket.on("createRoom", () => {
+    socket.on("createRoom", (nicknameOfRoomCreator) => {
       console.log("User asked to create room");
       // Create room
       roomsList[socket.id] = {
@@ -26,6 +26,7 @@ module.exports = function (server) {
         users: [
           {
             id: socket.id,
+            nickname: nicknameOfRoomCreator,
             pickedImage: false,
             voted: false,
             roundScore: 0,
@@ -40,7 +41,7 @@ module.exports = function (server) {
       socket.emit("createdRoomSuccessfully", roomsList[socket.id]);
     });
 
-    socket.on("joinedRoom", (uniqueRoomIdentifier) => {
+    socket.on("joinedRoom", (uniqueRoomIdentifier, nicknameOfUserThatJoined) => {
       console.log("Server detected joined", uniqueRoomIdentifier);
 
       if (SingletonRoomsList.checkIfThisRoomExists(uniqueRoomIdentifier)) {
@@ -50,6 +51,7 @@ module.exports = function (server) {
         if (roomsList[uniqueRoomIdentifier].users[0].id !== socket.id) {
           roomsList[uniqueRoomIdentifier].users.push({
             id: socket.id,
+            nickname: nicknameOfUserThatJoined,
             pickedImage: false,
             voted: false,
             roundScore: 0,
