@@ -54,7 +54,7 @@ export default function Home({ socket }) {
           flex-direction: column;
         }
         .button {
-          background-color: #FEB509;
+          background-color: #feb509;
           border: none;
           color: white;
           padding: 15px 32px;
@@ -62,6 +62,11 @@ export default function Home({ socket }) {
           text-decoration: none;
           display: inline-block;
           font-size: 16px;
+          cursor: pointer;
+        }
+        .button:hover {
+          background-color: #ffd677;
+          color: black;
         }
       `}</style>
     </Layout>
