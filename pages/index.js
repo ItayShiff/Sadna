@@ -38,9 +38,6 @@ export default function Home({ socket }) {
         </div>
       </main>
 
-      <footer>
-        <Link href="/daniel">Go to daniel page</Link>
-      </footer>
       <style jsx>{`
         .title {
           font-weight: bold;
@@ -55,6 +52,16 @@ export default function Home({ socket }) {
           justify-content: center;
           align-items: center;
           flex-direction: column;
+        }
+        .button {
+          background-color: #FEB509;
+          border: none;
+          color: white;
+          padding: 15px 32px;
+          text-align: center;
+          text-decoration: none;
+          display: inline-block;
+          font-size: 16px;
         }
       `}</style>
     </Layout>
