@@ -441,7 +441,7 @@ function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoom
         }
         #chatContainer input {
           width: 100%;
-          padding: 0px 20px;
+          padding: 0px 100px;
         }
         #chatMessagesContainer {
           height: 100%;
