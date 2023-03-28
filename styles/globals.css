@@ -5,3 +5,17 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
 }
+
+.button {
+  margin-top: 20px;
+  border: 1px solid white;
+  padding: 7px;
+  border-radius: 5px;
+  text-decoration: none;
+  transition: background-color 400ms, color 400ms;
+}
+
+.button:hover {
+  background-color: white;
+  color: black;
+}

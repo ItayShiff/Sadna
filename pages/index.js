@@ -10,7 +10,6 @@ export default function Home({ socket }) {
 
   useEffect(() => {
     socket.on("createdRoomSuccessfully", (room) => {
-      // console.log(room);
       router.push(`/room/${room.users[0].id}`);
     });
   }, []);
@@ -32,7 +31,11 @@ export default function Home({ socket }) {
           <div>Sadna Game</div>
         </div>
 
-        <button onClick={() => createRoom()}>Create room</button>
+        <div>
+          <button onClick={() => createRoom()} className="button">
+            Create room
+          </button>
+        </div>
       </main>
 
       <footer>
@@ -40,9 +43,18 @@ export default function Home({ socket }) {
       </footer>
       <style jsx>{`
         .title {
-          color: red;
           font-weight: bold;
           text-align: center;
+          font-size: 40px;
+        }
+        main {
+          color: #ffffff;
+          height: calc(100vh - 45px);
+          background: #353535fa;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          flex-direction: column;
         }
       `}</style>
     </Layout>

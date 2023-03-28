@@ -3,96 +3,11 @@ import axios from "axios";
 import { useRouter } from "next/router";
 import socket from "../../components/socketio/socket";
 import Head from "next/head";
+import Link from "next/link";
+import nouns from "../../components/utils/nouns";
+import verbs from "../../components/utils/verbs";
 
-const nouns = [
-  "cat",
-  "moon",
-  "sandwich",
-  "dog",
-  "cat",
-  "car",
-  "house",
-  "tree",
-  "pencil",
-  "book",
-  "chair",
-  "computer",
-  "telephone",
-  "apple",
-  "hat",
-  "chair",
-  "house",
-  "tree",
-  "car",
-  "desk",
-  "pencil",
-  "computer",
-  "book",
-  "dog",
-  "cat",
-  "flower",
-  "grass",
-  "sky",
-  "water",
-  "sun",
-  "moon",
-  "star",
-  "road",
-  "mountain",
-  "river",
-  "ocean",
-  "sea",
-  "stone",
-  "brick",
-  "paper",
-  "phone",
-  "television",
-  "radio",
-];
-const verbs = [
-  "eating",
-  "driving",
-  "flying",
-  "run",
-  "jump",
-  "walk",
-  "skip",
-  "dance",
-  "sing",
-  "swim",
-  "climb",
-  "play",
-  "run",
-  "jump",
-  "walk",
-  "skip",
-  "dance",
-  "sing",
-  "swim",
-  "climb",
-  "play",
-  "eat",
-  "sleep",
-  "dream",
-  "speak",
-  "listen",
-  "hear",
-  "see",
-  "watch",
-  "read",
-  "write",
-  "paint",
-  "draw",
-  "study",
-  "work",
-  "drive",
-  "cook",
-  "bake",
-  "build",
-  "create",
-  "imagine",
-  "think",
-];
+import { FaSpinner } from "react-icons/fa";
 
 const getRandomNoun = () => {
   return nouns[Math.floor(Math.random() * nouns.length)];
@@ -101,10 +16,48 @@ const getRandomNoun = () => {
 const getRandomVerb = () => {
   return verbs[Math.floor(Math.random() * verbs.length)];
 };
-
 function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoomOpened }) {
   if (roomExisting === false) {
-    return <div>Room not found</div>;
+    return (
+      <React.Fragment>
+        <title>Invalid Room</title>
+        <div id="container">
+          <div>Room not found {`:(`}</div>
+          <Link href="/">Go Back Homepage</Link>
+        </div>
+        <style jsx>{`
+          #container {
+            background: #161616cf;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            left: 0;
+            top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 26px;
+            flex-direction: column;
+          }
+          #container > :global(a) {
+            color: white;
+            margin-top: 20px;
+            border: 1px solid white;
+            padding: 7px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 400ms, color 400ms;
+          }
+
+          #container > :global(a):hover {
+            background-color: white;
+            color: black;
+          }
+        `}</style>
+      </React.Fragment>
+    );
   }
 
   const router = useRouter();
@@ -127,6 +80,9 @@ function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoom
 
   const [chatMessages, setChatMessages] = useState([]);
   const chatInput = useRef();
+
+  // const isSubmittedAlready = useRef(false);
+  const [isLoadingImagesGeneration, setIsLoadingImagesGeneration] = useState(false);
 
   useEffect(() => {
     if (roomExisting === false) {
@@ -264,12 +220,22 @@ function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoom
     socket.emit("startNewRound", uniqueRoomIdentifier, randomWordsToSend);
   };
 
+  // 1. in reset add isSubmittedAlready = useRef(false);
+  // 2. loading animation
   const submitInput = async () => {
+    // if (isSubmittedAlready.current === true) {
+    //   alert("You already submitted");
+    //   return;
+    // }
+
+    // isSubmittedAlready.current = true;
     const body = {
       prompt: input.current.value,
     };
     try {
+      setIsLoadingImagesGeneration(true);
       const response = await axios.post("http://localhost:3000/api/images/generate", body);
+      setIsLoadingImagesGeneration(false);
       setImages(response.data.images);
       alert("success");
     } catch (err) {
@@ -318,7 +284,7 @@ function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoom
 
   const getProperPhotoSubmitter = (uniqueIDofUserThatSubmittedThisImage) => {
     const IDofUserInUsersList = users.findIndex((currentUser) => currentUser.id === uniqueIDofUserThatSubmittedThisImage);
-    return users[IDofUserInUsersList].nickname ?? `Guest ${IDofUserInUsersList + 1}`;
+    return users[IDofUserInUsersList]?.nickname ?? `Guest ${IDofUserInUsersList + 1}`;
   };
 
   const sendMessageInChat = () => {
@@ -345,26 +311,30 @@ function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoom
       <Head>
         <title>{users[0].nickname ? `${users[0].nickname}'s room` : "Guest's room"}</title>
       </Head>
-      <div>The name of the uniqueRoomIdentifier: {uniqueRoomIdentifier}</div>
       <div id="roomNameContainer">
         <div id="roomName">{roomName}</div>
       </div>
 
       {/* <button onClick={getImage}>GET IMAGE</button> */}
 
-      <div>LIST OF USERS:</div>
       <div id="usersListContainer">
-        {users.map((currentUser, index) => (
-          <div key={currentUser.id}>
-            {currentUser.nickname ?? <span>Guest {index + 1}</span>} (unique id: {currentUser.id})
+        <div>LIST OF USERS:</div>
+        <div>
+          {users.map((currentUser, index) => (
+            <div key={currentUser.id}>
+              {currentUser?.nickname ?? <span>Guest {index + 1}</span>} (unique id: {currentUser.id})
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div id="usersThatPickedAnImage">
+        {imageSubmissions.map((submissionData, index) => (
+          <div key={submissionData.userThatPicked.id}>
+            {submissionData.userThatPicked?.nickname ?? <span>Guest {index + 1}</span>} picked an image
           </div>
         ))}
       </div>
-      {imageSubmissions.map((submissionData, index) => (
-        <div key={submissionData.userThatPicked.id}>
-          {submissionData.userThatPicked.nickname ?? <span>Guest {index + 1}</span>} picked an image
-        </div>
-      ))}
 
       {roundStarted === false ? (
         <button onClick={startNewRound}>Start Game</button>
@@ -383,8 +353,8 @@ function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoom
           {winnersData.length !== 0 && (
             <div id="winnersWrapper">
               <div>Winners:</div>
-              {winnersData.map((winner) => (
-                <div key={winner.id}>{winner.nickname}</div>
+              {winnersData.map((winner, index) => (
+                <div key={winner.id}>{winner?.nickname ?? `Guest`}</div>
               ))}
             </div>
           )}
@@ -392,9 +362,21 @@ function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoom
           {allUsersSubmittedImage === false ? (
             // Submission/generation phase
             <React.Fragment>
-              <div>Write a prompt for Craiyon that includes the words you were given:</div>
-              <input ref={input} />
-              <button onClick={submitInput}>SUBMIT</button>
+              {isLoadingImagesGeneration === false ? (
+                <div id="promptWrapperContainer">
+                  <div id="promptWrapper">
+                    <div>Write a prompt for Craiyon that includes the words you were given:</div>
+                    <input ref={input} />
+                    <button onClick={submitInput}>SUBMIT</button>
+                  </div>
+                </div>
+              ) : (
+                <div id="wrapperLoadingContainer">
+                  <div id="loadingContainer">
+                    <FaSpinner size="70px" />
+                  </div>
+                </div>
+              )}
 
               <div id="imagesWrapper">
                 {images.map((image, index) => (
@@ -488,7 +470,7 @@ function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoom
         #imagesWrapper img {
           height: 100%;
           width: 100%;
-          border: 10px solid #fff500;
+          border: 10px solid #1d1d1d;
           margin: 0 auto;
           cursor: pointer;
           transition: border-color 0.4s linear;
@@ -542,7 +524,54 @@ function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoom
         #usersListContainer {
           border: 1px solid black;
           display: inline-block;
-          padding: 3px;
+        }
+        #usersListContainer > div:first-child {
+          text-align: center;
+          background-color: #d2ffd6;
+          padding: 5px;
+        }
+        #usersListContainer > div:last-child div {
+          border-bottom: 3px solid black;
+          padding: 5px;
+        }
+        #usersListContainer > div:last-child div:last-child {
+          border-bottom: unset;
+        }
+
+        #loadingContainer {
+          animation: loadingSpinner 1s infinite 0s;
+          display: inline-block;
+        }
+
+        #wrapperLoadingContainer {
+          display: flex;
+          justify-content: center;
+        }
+
+        @keyframes loadingSpinner {
+          0% {
+            rotate: 0deg;
+          }
+          50% {
+            rotate: 180deg;
+          }
+          100% {
+            rotate: 360deg;
+          }
+        }
+
+        #promptWrapper {
+          padding: 10px;
+          width: 80%;
+          margin: 0 auto;
+          background: #dedede;
+        }
+
+        #promptWrapperContainer {
+          background: #bcbcbc;
+          width: 100%;
+        }
+        #usersThatPickedAnImage {
         }
       `}</style>
     </div>
@@ -554,7 +583,7 @@ export async function getServerSideProps(context) {
     const uniqueRoomIdentifier = context.params.uniqueRoomIdentifier;
 
     console.log(uniqueRoomIdentifier);
-    const response = await axios.get(`http://localhost:3000/api/room/${uniqueRoomIdentifier}`);
+    const response = await axios.get(`http://localhost:3000/api/room/${uniqueRoomIdentifier}`); // API request using Axios
 
     return {
       props: response.data,
