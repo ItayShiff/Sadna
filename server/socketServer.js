@@ -67,7 +67,7 @@ module.exports = function (server) {
 
     socket.on("leftRoom", (uniqueRoomIdentifier) => {
       // Detect if there's only 1 user left, if yes remove the room
-      if (roomsList[uniqueRoomIdentifier].users.length === 1) {
+      if (roomsList[uniqueRoomIdentifier]?.users.length === 1) {
         delete roomsList[uniqueRoomIdentifier];
       } else {
         // Remove the user from the users list in the specific room
