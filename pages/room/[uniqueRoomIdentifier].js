@@ -234,7 +234,12 @@ function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoom
     };
     try {
       setIsLoadingImagesGeneration(true);
-      const response = await axios.post("http://localhost:3000/api/images/generate", body);
+
+      // Development:
+      // const response = await axios.post("http://localhost:3000/api/images/generate", body);
+      // Production:
+      const response = await axios.post("http://proompter.onrender.com/api/images/generate", body);
+
       setIsLoadingImagesGeneration(false);
       setImages(response.data.images);
       alert("success");
@@ -583,7 +588,10 @@ export async function getServerSideProps(context) {
     const uniqueRoomIdentifier = context.params.uniqueRoomIdentifier;
 
     console.log(uniqueRoomIdentifier);
-    const response = await axios.get(`http://localhost:3000/api/room/${uniqueRoomIdentifier}`); // API request using Axios
+    // Development:
+    // const response = await axios.get(`http://localhost:3000/api/room/${uniqueRoomIdentifier}`); // API request using Axios
+    // Production:
+    const response = await axios.get(`http://proompter.onrender.com/api/room/${uniqueRoomIdentifier}`); // API request using Axios
 
     return {
       props: response.data,
