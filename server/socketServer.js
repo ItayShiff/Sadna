@@ -22,7 +22,6 @@ module.exports = function (server) {
       console.log("User asked to create room");
       // Create room
       roomsList[socket.id] = {
-        roomName: "my room",
         users: [
           {
             id: socket.id,

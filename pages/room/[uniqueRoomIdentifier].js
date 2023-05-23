@@ -16,7 +16,7 @@ const getRandomNoun = () => {
 const getRandomVerb = () => {
   return verbs[Math.floor(Math.random() * verbs.length)];
 };
-function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoomOpened }, props) {
+function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, props) {
   // console.log(roomExisting, roomName, usersListWhenRoomOpened, "\n -------- \n", props);
 
   if (roomExisting === false) {
@@ -330,9 +330,6 @@ function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoom
       <Head>
         <title>{users[0].nickname ? `${users[0].nickname}'s room` : "Guest's room"}</title>
       </Head>
-      <div id="roomNameContainer">
-        <div id="roomName">{roomName}</div>
-      </div>
 
       {/* <button onClick={getImage}>GET IMAGE</button> */}
 
@@ -515,12 +512,6 @@ function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoom
           text-align: center;
           font-weight: bold;
         }
-
-        #roomNameContainer {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
         #randomWordsWrapper {
           display: flex;
           justify-content: space-around;
@@ -532,14 +523,7 @@ function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoom
           border-radius: 10px;
           padding: 10px;
         }
-        #roomName {
-          color: #137500;
-          font-weight: bold;
-          text-align: center;
-          background-color: #beff9b;
-          padding: 5px;
-          margin: 10px 0px;
-        }
+
         #usersListContainer {
           border: 1px solid black;
           display: inline-block;
