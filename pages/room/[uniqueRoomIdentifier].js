@@ -16,8 +16,8 @@ const getRandomNoun = () => {
 const getRandomVerb = () => {
   return verbs[Math.floor(Math.random() * verbs.length)];
 };
-function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoomOpened }) {
-  console.log(roomName, usersListWhenRoomOpened);
+function uniqueRoomIdentifier(props, { roomExisting, roomName, users: usersListWhenRoomOpened }) {
+  console.log(roomExisting, roomName, usersListWhenRoomOpened, "\n -------- \n", props);
 
   if (roomExisting === false) {
     return (
