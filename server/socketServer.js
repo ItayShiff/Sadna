@@ -72,10 +72,12 @@ module.exports = function (server) {
       } else {
         // Remove the user from the users list in the specific room
         const userIDWhoLeftRoom = socket.id;
-        const idToRemoveFromUsersList = roomsList[uniqueRoomIdentifier].users.findIndex(
+        const idToRemoveFromUsersList = roomsList[uniqueRoomIdentifier]?.users.findIndex(
           (current) => current.id === userIDWhoLeftRoom
         );
-        roomsList[uniqueRoomIdentifier].users.splice(idToRemoveFromUsersList, 1);
+        if (isNaN(idToRemoveFromUsersList) === false) {
+          roomsList[uniqueRoomIdentifier].users.splice(idToRemoveFromUsersList, 1);
+        }
         io.in(uniqueRoomIdentifier).emit("updatedRoom", roomsList[uniqueRoomIdentifier]);
       }
 

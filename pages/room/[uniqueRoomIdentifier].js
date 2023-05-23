@@ -17,10 +17,14 @@ const getRandomVerb = () => {
   return verbs[Math.floor(Math.random() * verbs.length)];
 };
 function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoomOpened }) {
+  console.log(roomName, usersListWhenRoomOpened);
+
   if (roomExisting === false) {
     return (
       <React.Fragment>
-        <title>Invalid Room</title>
+        <Head>
+          <title>Invalid Room</title>
+        </Head>
         <div id="container">
           <div>Room not found {`:(`}</div>
           <Link href="/">Go Back Homepage</Link>
@@ -594,10 +598,12 @@ export async function getServerSideProps(context) {
     // Production:
     const response = await axios.get(`https://proompter.onrender.com/api/room/${uniqueRoomIdentifier}`); // API request using Axios
 
+    console.log("Got successfully", response.data);
     return {
       props: response.data,
     };
   } catch (err) {
+    console.log("YES we are in error now");
     return {
       props: {
         roomExisting: false,
