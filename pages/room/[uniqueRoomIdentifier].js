@@ -16,8 +16,8 @@ const getRandomNoun = () => {
 const getRandomVerb = () => {
   return verbs[Math.floor(Math.random() * verbs.length)];
 };
-function uniqueRoomIdentifier(props, { roomExisting, roomName, users: usersListWhenRoomOpened }) {
-  console.log(roomExisting, roomName, usersListWhenRoomOpened, "\n -------- \n", props);
+function uniqueRoomIdentifier({ roomExisting, roomName, users: usersListWhenRoomOpened }, props) {
+  // console.log(roomExisting, roomName, usersListWhenRoomOpened, "\n -------- \n", props);
 
   if (roomExisting === false) {
     return (
@@ -68,6 +68,7 @@ function uniqueRoomIdentifier(props, { roomExisting, roomName, users: usersListW
   const { uniqueRoomIdentifier } = router.query;
 
   const [users, setUsers] = useState(usersListWhenRoomOpened); //!!!!!!  !!! !!!
+  console.log("Rendered", users, usersListWhenRoomOpened);
 
   const [roundStarted, setNewRoundStarted] = useState(false);
   const [listOfRandomWordsToBeShown, setListOfRandomWordsToBeShown] = useState([]);
@@ -98,7 +99,10 @@ function uniqueRoomIdentifier(props, { roomExisting, roomName, users: usersListW
     socket.emit("joinedRoom", uniqueRoomIdentifier, localStorage.getItem("nickname"));
 
     socket.on("updatedRoom", (updatedRoom) => {
-      console.log(updatedRoom.users);
+      if (!updatedRoom || !updatedRoom.users) {
+        return;
+      }
+      // console.log(updatedRoom?.users);
       setUsers(updatedRoom.users);
     });
 
@@ -186,7 +190,9 @@ function uniqueRoomIdentifier(props, { roomExisting, roomName, users: usersListW
 
     console.log("okay new");
     const element = document.getElementById("chatMessagesContainer");
-    element.scrollTo(0, element.scrollHeight);
+    if (element) {
+      element.scrollTo(0, element.scrollHeight);
+    }
 
     return () => {
       socket.off("messageArrivedInChat");
@@ -316,6 +322,9 @@ function uniqueRoomIdentifier(props, { roomExisting, roomName, users: usersListW
     }
   };
 
+  if (!users) {
+    return <div>Loading</div>;
+  }
   return (
     <div>
       <Head>
