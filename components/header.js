@@ -1,10 +1,18 @@
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/router";
+import { BsFillPersonFill, BsFillHouseFill } from "react-icons/bs";
+import { MdEdit } from "react-icons/md";
+import { ImCancelCircle } from "react-icons/im";
+import { AiOutlineSave } from "react-icons/ai";
+import styles from "../styles/header.module.css";
 
 const Header = () => {
   const input = useRef();
   const [nickname, setNickname] = useState(null);
+  const router = useRouter();
+  const isHomepageNow = router.pathname === "/";
 
   useEffect(() => {
     const nicknameLocalStorage = localStorage.getItem("nickname");
@@ -34,19 +42,22 @@ const Header = () => {
     <React.Fragment>
       <header>
         <div>
-          <Image src="/homepage.png" alt="homepage" width={18} height={18} style={{ margin: "10px" }} />
-          <Link href="/">Homepage</Link>
+          {isHomepageNow === false ? (
+            <Link href="/" className={styles.customLink}>
+              <BsFillHouseFill size="20px" />
+              {/* <Image src="/homepage.png" alt="homepage" width={18} height={18} style={{ paddingRight: "7px" }} /> */}
+              <div>Homepage</div>
+            </Link>
+          ) : (
+            <Link href="/about" className={styles.customLink}>
+              <BsFillPersonFill size="20px" />
+              <div>About</div>
+            </Link>
+          )}
         </div>
-        <div>
-          {nickname ?? "Guest"}
-          <Image
-            src="/edit.png"
-            alt="edit nickname"
-            width={18}
-            height={18}
-            style={{ margin: "10px", cursor: "pointer" }}
-            onClick={changeNickname}
-          />
+        <div onClick={changeNickname} className={styles.nicknameButton}>
+          <div>{nickname ?? "Guest"}</div>
+          <MdEdit size="20px" />
         </div>
       </header>
 
@@ -54,10 +65,18 @@ const Header = () => {
         <div id="modalForChoosingModelWholeContainer">
           <div id="modalForChoosingModelBodyContainer">
             <div>Choose your nickname</div>
-            <input ref={input} defaultValue={nickname} />
+            <input ref={input} defaultValue={nickname} placeholder="Nickname" />
             <div id="buttonsNicknameWrapper">
-              <button onClick={closeModalNicknameChoosing}>Cancel</button>
-              <button onClick={saveNewNickname}>Save</button>
+              <button onClick={closeModalNicknameChoosing}>
+                <ImCancelCircle size="20px" color="#f35c5c" />
+
+                <div>Cancel</div>
+              </button>
+              <button onClick={saveNewNickname}>
+                <AiOutlineSave size="20px" color="#99ff8c" />
+
+                <div>Save</div>
+              </button>
             </div>
           </div>
         </div>
@@ -68,8 +87,9 @@ const Header = () => {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          background-color: #d6ff9e;
           height: 45px;
+          background: linear-gradient(180deg, rgba(30, 30, 30, 1) 20%, rgba(48, 48, 48, 1) 100%);
+          color: #dedede;
         }
 
         header > div {
@@ -77,34 +97,78 @@ const Header = () => {
           display: flex;
           justify-content: center;
           align-items: center;
+          height: 100%;
         }
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
         #modalForChoosingModelWholeContainer {
-          background: #3f3f3fcf;
+          animation-name: fadeIn;
+          animation-duration: 500ms;
+          background: #171717bd;
           position: fixed;
           width: 100%;
           height: 100%;
           left: 0;
           top: 0;
+          z-index: 2;
+          color: #ffdf9b;
         }
         #modalForChoosingModelBodyContainer {
           position: absolute;
           left: 50%;
           top: 50%;
           transform: translate(-50%, -50%);
-          background: #ecffe5;
+          background: #2d2d2d;
           text-align: center;
           padding-top: 10px;
           border-radius: 10px;
+          box-shadow: 0px 0px 7px #eece86;
+        }
+
+        #modalForChoosingModelBodyContainer div:first-child {
+          font-size: 20px;
+          padding: 0px 15px;
         }
         #modalForChoosingModelBodyContainer input {
-          margin: 0px 10px;
+          margin: 7px 10px;
+          margin-top: 20px;
+          border: 0;
+          border-bottom: 1px;
+          border-color: #a6a6a6;
+          border-style: solid;
+          background: unset;
+          color: white;
+          font-size: 18px;
+        }
+        #modalForChoosingModelBodyContainer input:focus-visible {
+          outline: unset;
         }
         #buttonsNicknameWrapper {
           display: flex;
-          padding-top: 10px;
+          padding-top: 5px;
         }
         #buttonsNicknameWrapper button {
           width: 100%;
+          border: 0;
+          background: unset;
+          color: #ffdf9b;
+          cursor: pointer;
+          transition: color 300ms;
+
+          padding: 13px 0px;
+        }
+        #buttonsNicknameWrapper button div {
+          margin-top: 1px;
+        }
+        #buttonsNicknameWrapper button:hover {
+          color: #f9bf41;
         }
       `}</style>
     </React.Fragment>
