@@ -81,8 +81,37 @@ function About() {
           width: 80%;
           justify-content: space-around;
         }
-        #wrapperHomepage > div:last-child > div:first-child {
-          margin-right: 50px;
+        @media only screen and (min-width: 1267px) {
+          #wrapperHomepage > div:last-child > div:first-child {
+            margin-right: 50px;
+          }
+        }
+        @media only screen and (max-width: 1266px) {
+          #wrapperHomepage > div:last-child {
+            flex-direction: column;
+          }
+        }
+
+        @media screen and (max-width: 1200px) {
+          #wrapperForCentering {
+            display: block;
+          }
+          #wrapperHomepage {
+            background: #303030;
+          }
+        }
+
+        @media screen and (max-width: 712px) {
+          #wrapperHomepage > div:last-child {
+            width: 95%;
+          }
+        }
+
+        @media screen and (max-width: 530px) {
+          #wrapperHomepage,
+          .titles {
+            font-size: 16px;
+          }
         }
       `}</style>
     </Layout>

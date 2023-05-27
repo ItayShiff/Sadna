@@ -17,3 +17,23 @@
     font-size: 20px;
     background-color: #696969;
 }
+
+@media screen and (max-width: 1226px) {
+    #imagesDevelopersWrapper {
+        justify-content: center;
+        padding-bottom: 30px;
+    }    
+}
+
+@media screen and (max-width: 712px) {
+    .imagesDevelopers { 
+        width: 100%;
+        height: calc(100% - 30px);
+    }
+}
+@media screen and (max-width: 530px) {
+    .titles {
+      font-size: 18px;
+    }
+}
+
