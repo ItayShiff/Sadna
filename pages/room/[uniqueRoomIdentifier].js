@@ -7,7 +7,31 @@ import Link from "next/link";
 import nouns from "../../components/utils/nouns";
 import verbs from "../../components/utils/verbs";
 
+import { uuid } from "uuidv4";
+
 import { FaSpinner } from "react-icons/fa";
+import Layout from "../../components/layout";
+import { AiOutlineSend } from "react-icons/ai";
+import { SiLitiengine } from "react-icons/si";
+import { GoPerson } from "react-icons/go";
+
+const nth = function (d) {
+  if (d > 3 && d < 21) return d + "th";
+  switch (d % 10) {
+    case 1:
+      return d + "st";
+    case 2:
+      return d + "nd";
+    case 3:
+      return d + "rd";
+    default:
+      return d + "th";
+  }
+};
+
+const colorsNames = ["#A8B7FF", "#DFA8A8", "#82D2B1", "#D9C781", "#8E96FF", "#EA97B9"];
+
+const minimumNumberOfPlayersToStartGame = 3;
 
 const getRandomNoun = () => {
   return nouns[Math.floor(Math.random() * nouns.length)];
@@ -86,6 +110,8 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
   const [chatMessages, setChatMessages] = useState([]);
   const chatInput = useRef();
 
+  const myPrivateUniqueID = useRef();
+
   // const isSubmittedAlready = useRef(false);
   const [isLoadingImagesGeneration, setIsLoadingImagesGeneration] = useState(false);
 
@@ -104,6 +130,10 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
       }
       // console.log(updatedRoom?.users);
       setUsers(updatedRoom.users);
+    });
+
+    socket.on("yourPrivateUniqueID", (myPrivateUniquteIDValue) => {
+      myPrivateUniqueID.current = myPrivateUniquteIDValue;
     });
 
     console.log("Image submissions ", imageSubmissions);
@@ -219,8 +249,8 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
   };
 
   const startNewRound = () => {
-    if (users.length < 3) {
-      alert("Room must have at least 3 users in order to start the game");
+    if (users.length < minimumNumberOfPlayersToStartGame) {
+      alert(`Room must have at least ${minimumNumberOfPlayersToStartGame} users in order to start the game`);
       return;
     }
 
@@ -246,9 +276,9 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
       setIsLoadingImagesGeneration(true);
 
       // Development:
-      // const response = await axios.post("http://localhost:3000/api/images/generate", body);
+      const response = await axios.post("http://localhost:3000/api/images/generate", body);
       // Production:
-      const response = await axios.post("https://proompter.onrender.com/api/images/generate", body);
+      // const response = await axios.post("https://proompter.onrender.com/api/images/generate", body);
 
       setIsLoadingImagesGeneration(false);
       setImages(response.data.images);
@@ -309,6 +339,7 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
         "messageSentInChat",
         uniqueRoomIdentifier,
         localStorage.getItem("nickname") ?? "Guest",
+        myPrivateUniqueID.current,
         chatInput.current.value
       );
 
@@ -326,143 +357,250 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
     return <div>Loading</div>;
   }
   return (
-    <div>
+    <Layout>
       <Head>
         <title>{users[0].nickname ? `${users[0].nickname}'s room` : "Guest's room"}</title>
       </Head>
 
       {/* <button onClick={getImage}>GET IMAGE</button> */}
-
-      <div id="usersListContainer">
-        <div>LIST OF USERS:</div>
-        <div>
-          {users.map((currentUser, index) => (
-            <div key={currentUser.id}>
-              {currentUser?.nickname ?? <span>Guest {index + 1}</span>} (unique id: {currentUser.id})
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div id="usersThatPickedAnImage">
-        {imageSubmissions.map((submissionData, index) => (
-          <div key={submissionData.userThatPicked.id}>
-            {submissionData.userThatPicked?.nickname ?? <span>Guest {index + 1}</span>} picked an image
-          </div>
-        ))}
-      </div>
-
-      {roundStarted === false ? (
-        <button onClick={startNewRound}>Start Game</button>
-      ) : (
-        <div>
-          {winnersData.length !== 0 && <button onClick={startNewRound}>Start Game</button>}
-
-          <div id="randomWordsWrapper">
-            {listOfRandomWordsToBeShown.map((randomWord) => (
-              <div key={randomWord} className="randomWord">
-                {randomWord}
-              </div>
-            ))}
-          </div>
-
-          {winnersData.length !== 0 && (
-            <div id="winnersWrapper">
-              <div>Winners:</div>
-              {winnersData.map((winner, index) => (
-                <div key={winner.id}>{winner?.nickname ?? `Guest`}</div>
-              ))}
-            </div>
-          )}
-
-          {allUsersSubmittedImage === false ? (
-            // Submission/generation phase
-            <React.Fragment>
-              {isLoadingImagesGeneration === false ? (
-                <div id="promptWrapperContainer">
-                  <div id="promptWrapper">
-                    <div>Write a prompt for Craiyon that includes the words you were given:</div>
-                    <input ref={input} />
-                    <button onClick={submitInput}>SUBMIT</button>
+      <main>
+        <div id="wrapperAll" className={roundStarted === true ? "started" : undefined}>
+          {roundStarted === true ? (
+            <div id="startedContainer">
+              <div id="usersThatPickedAnImage">
+                {imageSubmissions.map((submissionData, index) => (
+                  <div key={submissionData.userThatPicked.id}>
+                    {submissionData.userThatPicked?.nickname ?? <span>Guest {index + 1}</span>} picked an image
                   </div>
-                </div>
-              ) : (
-                <div id="wrapperLoadingContainer">
-                  <div id="loadingContainer">
-                    <FaSpinner size="70px" />
-                  </div>
-                </div>
-              )}
-
-              <div id="imagesWrapper">
-                {images.map((image, index) => (
-                  <img
-                    key={index}
-                    className="image"
-                    src={`data:image/png;base64,${image}`}
-                    onClick={() => clickSubmitImage(index)}
-                  />
                 ))}
               </div>
-            </React.Fragment>
-          ) : (
-            // Vote phase
-            <div id="imagesWrapper">
-              {imageSubmissions.map((submissionData, indexOfSubmittedImage) => (
-                <div className="specificImageToVoteForContainer votes">
-                  {allUsersVoted === true && (
-                    <div>
-                      <div>{getProperPhotoSubmitter(submissionData.userThatPicked.id)}</div>
-                      <div>{getProperPhotoRoundScore(submissionData.userThatPicked.id)}</div>
-                    </div>
-                  )}
 
-                  <img
-                    key={indexOfSubmittedImage}
-                    className="image"
-                    src={`data:image/png;base64,${submissionData.imagePicked}`}
-                    onClick={() => clickVoteForWinningPhoto(indexOfSubmittedImage)}
-                  />
+              <div>
+                {winnersData.length !== 0 && <button onClick={startNewRound}>Start Game</button>}
+
+                <div id="randomWordsWrapper">
+                  {listOfRandomWordsToBeShown.map((randomWord) => (
+                    <div key={randomWord} className="randomWord">
+                      {randomWord}
+                    </div>
+                  ))}
                 </div>
-              ))}
+
+                {winnersData.length !== 0 && (
+                  <div id="winnersWrapper">
+                    <div>Winners:</div>
+                    {winnersData.map((winner, index) => (
+                      <div key={winner.id}>{winner?.nickname ?? `Guest`}</div>
+                    ))}
+                  </div>
+                )}
+
+                {allUsersSubmittedImage === false ? (
+                  // Submission/generation phase
+                  <React.Fragment>
+                    {isLoadingImagesGeneration === false ? (
+                      <div id="promptWrapperContainer">
+                        <div id="promptWrapper">
+                          <div>Write a prompt for Craiyon that includes the words you were given:</div>
+                          <input ref={input} />
+                          <button onClick={submitInput}>SUBMIT</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div id="wrapperLoadingContainer">
+                        <div id="loadingContainer">
+                          <FaSpinner size="70px" />
+                        </div>
+                      </div>
+                    )}
+
+                    <div id="imagesWrapper">
+                      {images.map((image, index) => (
+                        <img
+                          key={index}
+                          className="image"
+                          src={`data:image/png;base64,${image}`}
+                          onClick={() => clickSubmitImage(index)}
+                        />
+                      ))}
+                    </div>
+                  </React.Fragment>
+                ) : (
+                  // Vote phase
+                  <div id="imagesWrapper">
+                    {imageSubmissions.map((submissionData, indexOfSubmittedImage) => (
+                      <div className="specificImageToVoteForContainer votes">
+                        {allUsersVoted === true && (
+                          <div>
+                            <div>{getProperPhotoSubmitter(submissionData.userThatPicked.id)}</div>
+                            <div>{getProperPhotoRoundScore(submissionData.userThatPicked.id)}</div>
+                          </div>
+                        )}
+
+                        <img
+                          key={indexOfSubmittedImage}
+                          className="image"
+                          src={`data:image/png;base64,${submissionData.imagePicked}`}
+                          onClick={() => clickVoteForWinningPhoto(indexOfSubmittedImage)}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div id="notStartedContainer">
+              <div id="usersListContainer">
+                {users.map((currentUser, index) => (
+                  <div key={currentUser.id}>
+                    <GoPerson size="100px" color={colorsNames[index % colorsNames.length]} />
+                    <div>{currentUser?.nickname ?? <span>Guest {index + 1}</span>}</div>
+                  </div>
+                ))}
+                {users.length < minimumNumberOfPlayersToStartGame && (
+                  <React.Fragment>
+                    {new Array(minimumNumberOfPlayersToStartGame - users.length).fill().map((curr, index) => (
+                      <div key={uuid()} style={{ opacity: "0.2" }}>
+                        <GoPerson size="100px" />
+                        <div>{nth(users.length + index + 1)} player</div>
+                      </div>
+                    ))}
+                  </React.Fragment>
+                )}
+              </div>
+
+              <button onClick={startNewRound} id="startGameButton">
+                <SiLitiengine size="22px" />
+                <div>Start Game</div>
+              </button>
             </div>
           )}
-        </div>
-      )}
 
-      <div id="chatContainer">
-        <div id="chatMessagesContainer">
-          {chatMessages.map((messageData, index) => (
-            <div key={index} className="messageInChat">
-              <b>{messageData.sender}</b>: {messageData.message}
+          <div>
+            {roundStarted === true && (
+              <div id="usersListContainer">
+                {users.map((currentUser, index) => (
+                  <div key={currentUser.id}>
+                    <GoPerson size="100px" color={colorsNames[index % colorsNames.length]} />
+                    <div>{currentUser?.nickname ?? <span>Guest {index + 1}</span>}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div id="chatContainer">
+              <div id="chatMessagesContainer">
+                {chatMessages.map((messageData, index) => (
+                  <div key={index} className="messageInChat">
+                    <b
+                      style={{
+                        color: colorsNames[users.findIndex((currUser) => currUser.id === messageData.uniqueSenderID)],
+                      }}
+                    >
+                      {messageData.sender}
+                    </b>
+                    : {messageData.message}
+                  </div>
+                ))}
+              </div>
+
+              <div id="inputSendChatWrapper">
+                <input ref={chatInput} placeholder="Enter text message" onKeyDown={detectEnterForSending} />
+                <AiOutlineSend
+                  id="sendButtonChat"
+                  size="18px"
+                  onClick={sendMessageInChat}
+                  style={{ padding: "5px", cursor: "pointer" }}
+                />
+              </div>
             </div>
-          ))}
+          </div>
         </div>
-
-        <div id="inputSendChatWrapper">
-          <input ref={chatInput} placeholder="Enter text message" onKeyDown={detectEnterForSending} />
-          <button onClick={sendMessageInChat}> {`>`} </button>
-        </div>
-      </div>
+      </main>
       <style jsx>{`
         #chatContainer {
           height: 200px;
-          width: 50%;
-          margin: 15px auto;
+          width: 570px;
+          margin: 15px;
           border: 1px solid black;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          background: #eeeeee;
+          background: #1e1e1e;
+          border: 2px solid#ffec4859;
+          border-radius: 15px;
+          overflow: hidden;
         }
         #chatContainer input {
           width: 100%;
-          padding: 0px 20px;
+          padding: 5px 12px;
+          color: #dedede;
         }
         #chatMessagesContainer {
           height: 100%;
           overflow-x: hidden;
-          padding-bottom: 5px;
+          padding: 5px;
+          margin-bottom: 5px;
+        }
+
+        #chatMessagesContainer::-webkit-scrollbar-track {
+          -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+          background-color: #2a2a2a;
+        }
+
+        #chatMessagesContainer::-webkit-scrollbar {
+          width: 12px;
+          background-color: #1a1a1a;
+        }
+
+        #chatMessagesContainer::-webkit-scrollbar-thumb {
+          -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+          background-color: #7c7330;
+        }
+
+        main {
+          color: #dedede;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100%;
+        }
+        #wrapperAll {
+          background: #3f3f3f;
+          width: 100%;
+          display: flex;
+          align-items: center;
+        }
+        #wrapperAll.started {
+          height: calc(100vh - 45px - 15px - 30px);
+          margin-top: -15px;
+        }
+        #notStartedContainer {
+          flex: 1;
+        }
+        #notStartedContainer #usersListContainer {
+          padding-top: 10px;
+        }
+
+        #startGameButton {
+          color: #dedede;
+          padding: 15px 32px;
+          font-size: 20px;
+          cursor: pointer;
+          margin: 15px auto;
+          border: 2px solid #ffec4859;
+          background: unset;
+          display: flex;
+          align-items: center;
+          justify-content: space-around;
+          transition: background-color 250ms;
+        }
+        #startGameButton div {
+          margin-left: 10px;
+        }
+        #startGameButton:hover {
+          background-color: #eece86;
+          color: black;
         }
 
         .messageInChat {
@@ -470,7 +608,18 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
         }
         #inputSendChatWrapper {
           display: flex;
+          align-items: center;
         }
+        #inputSendChatWrapper input {
+          outline: none;
+          background: #1a1a1a;
+          border: 0;
+        }
+        #sendButtonChat {
+          padding: 5px;
+          cursor: pointer;
+        }
+
         #winnersWrapper {
           background: #eaeaea;
           text-align: center;
@@ -525,20 +674,17 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
         }
 
         #usersListContainer {
-          border: 1px solid black;
-          display: inline-block;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          flex-wrap: wrap;
         }
-        #usersListContainer > div:first-child {
+        #usersListContainer > div {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
           text-align: center;
-          background-color: #d2ffd6;
-          padding: 5px;
-        }
-        #usersListContainer > div:last-child div {
-          border-bottom: 3px solid black;
-          padding: 5px;
-        }
-        #usersListContainer > div:last-child div:last-child {
-          border-bottom: unset;
+          align-items: center;
         }
 
         #loadingContainer {
@@ -567,17 +713,14 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
           padding: 10px;
           width: 80%;
           margin: 0 auto;
-          background: #dedede;
         }
-
         #promptWrapperContainer {
-          background: #bcbcbc;
           width: 100%;
         }
         #usersThatPickedAnImage {
         }
       `}</style>
-    </div>
+    </Layout>
   );
 }
 
@@ -587,9 +730,9 @@ export async function getServerSideProps(context) {
 
     console.log(uniqueRoomIdentifier);
     // Development:
-    // const response = await axios.get(`http://localhost:3000/api/room/${uniqueRoomIdentifier}`); // API request using Axios
+    const response = await axios.get(`http://localhost:3000/api/room/${uniqueRoomIdentifier}`); // API request using Axios
     // Production:
-    const response = await axios.get(`https://proompter.onrender.com/api/room/${uniqueRoomIdentifier}`); // API request using Axios
+    // const response = await axios.get(`https://proompter.onrender.com/api/room/${uniqueRoomIdentifier}`); // API request using Axios
 
     console.log("Got successfully", response.data);
     return {
