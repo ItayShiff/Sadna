@@ -84,6 +84,11 @@ const Header = () => {
 
       <style jsx>{`
         header {
+          position: absolute;
+          width: 100%;
+          top: 0;
+          left: 0;
+          z-index: 2;
           display: flex;
           justify-content: space-between;
           align-items: center;

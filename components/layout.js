@@ -16,7 +16,7 @@ const Layout = ({ children }) => {
         main {
           position: relative;
           background: #303030;
-          height: calc(100vh - 45px);
+          height: 100vh;
         }
       `}</style>
     </>

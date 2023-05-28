@@ -89,7 +89,7 @@ export default function Home({ socket }) {
           content: "";
           background-color: #acacac24;
           width: 30px;
-          height: calc(100% + 50%);
+          height: 150%;
           position: absolute;
           top: -305px;
           left: 0;
@@ -99,7 +99,7 @@ export default function Home({ socket }) {
         #wrapperHomepage {
           position: relative;
           background: #303030;
-          height: calc(100vh - 45px);
+          height: 100vh;
           display: flex;
           justify-content: center;
           flex-direction: column;

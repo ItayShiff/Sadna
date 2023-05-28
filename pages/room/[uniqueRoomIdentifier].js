@@ -14,6 +14,11 @@ import Layout from "../../components/layout";
 import { AiOutlineSend } from "react-icons/ai";
 import { SiLitiengine } from "react-icons/si";
 import { GoPerson } from "react-icons/go";
+import { BsFillShareFill } from "react-icons/bs";
+
+import { ProompterSVG } from "../../components/svg";
+
+const colorChatOutlines = "#adadad59";
 
 const nth = function (d) {
   if (d > 3 && d < 21) return d + "th";
@@ -353,6 +358,17 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
     }
   };
 
+  const clickedShareButton = () => {
+    navigator.clipboard.writeText(`https://proompter.onrender.com/room/${uniqueRoomIdentifier}`).then(
+      () => {
+        alert("Link copied to clipboard!");
+      },
+      () => {
+        alert("Failed to copy");
+      }
+    );
+  };
+
   if (!users) {
     return <div>Loading</div>;
   }
@@ -363,160 +379,198 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
       </Head>
 
       {/* <button onClick={getImage}>GET IMAGE</button> */}
-      <main>
+      <div id="main">
+        <div id="proompterLogo" className={roundStarted === true ? "started" : "notStarted"}>
+          <ProompterSVG style={{ fontSize: 180 }} alt="Proompter" />
+        </div>
+
         <div id="wrapperAll" className={roundStarted === true ? "started" : undefined}>
-          {roundStarted === true ? (
-            <div id="startedContainer">
-              <div id="usersThatPickedAnImage">
-                {imageSubmissions.map((submissionData, index) => (
-                  <div key={submissionData.userThatPicked.id}>
-                    {submissionData.userThatPicked?.nickname ?? <span>Guest {index + 1}</span>} picked an image
-                  </div>
-                ))}
-              </div>
-
-              <div>
-                {winnersData.length !== 0 && <button onClick={startNewRound}>Start Game</button>}
-
-                <div id="randomWordsWrapper">
-                  {listOfRandomWordsToBeShown.map((randomWord) => (
-                    <div key={randomWord} className="randomWord">
-                      {randomWord}
+          <div>
+            {roundStarted === true ? (
+              <div id="startedContainer">
+                <div id="usersThatPickedAnImage">
+                  {imageSubmissions.map((submissionData, index) => (
+                    <div key={submissionData.userThatPicked.id}>
+                      {submissionData.userThatPicked?.nickname ?? <span>Guest {index + 1}</span>} picked an image
                     </div>
                   ))}
                 </div>
 
-                {winnersData.length !== 0 && (
-                  <div id="winnersWrapper">
-                    <div>Winners:</div>
-                    {winnersData.map((winner, index) => (
-                      <div key={winner.id}>{winner?.nickname ?? `Guest`}</div>
+                <div>
+                  {winnersData.length !== 0 && <button onClick={startNewRound}>Start Game</button>}
+
+                  <div id="randomWordsWrapper">
+                    {listOfRandomWordsToBeShown.map((randomWord) => (
+                      <div key={randomWord} className="randomWord">
+                        {randomWord}
+                      </div>
                     ))}
                   </div>
-                )}
 
-                {allUsersSubmittedImage === false ? (
-                  // Submission/generation phase
-                  <React.Fragment>
-                    {isLoadingImagesGeneration === false ? (
-                      <div id="promptWrapperContainer">
-                        <div id="promptWrapper">
-                          <div>Write a prompt for Craiyon that includes the words you were given:</div>
-                          <input ref={input} />
-                          <button onClick={submitInput}>SUBMIT</button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div id="wrapperLoadingContainer">
-                        <div id="loadingContainer">
-                          <FaSpinner size="70px" />
-                        </div>
-                      </div>
-                    )}
-
-                    <div id="imagesWrapper">
-                      {images.map((image, index) => (
-                        <img
-                          key={index}
-                          className="image"
-                          src={`data:image/png;base64,${image}`}
-                          onClick={() => clickSubmitImage(index)}
-                        />
+                  {winnersData.length !== 0 && (
+                    <div id="winnersWrapper">
+                      <div>Winners:</div>
+                      {winnersData.map((winner, index) => (
+                        <div key={winner.id}>{winner?.nickname ?? `Guest`}</div>
                       ))}
                     </div>
-                  </React.Fragment>
-                ) : (
-                  // Vote phase
-                  <div id="imagesWrapper">
-                    {imageSubmissions.map((submissionData, indexOfSubmittedImage) => (
-                      <div className="specificImageToVoteForContainer votes">
-                        {allUsersVoted === true && (
-                          <div>
-                            <div>{getProperPhotoSubmitter(submissionData.userThatPicked.id)}</div>
-                            <div>{getProperPhotoRoundScore(submissionData.userThatPicked.id)}</div>
+                  )}
+
+                  {allUsersSubmittedImage === false ? (
+                    // Submission/generation phase
+                    <React.Fragment>
+                      {isLoadingImagesGeneration === false ? (
+                        <div id="promptWrapperContainer">
+                          <div id="promptWrapper">
+                            <div>Write a prompt for Craiyon that includes the words you were given:</div>
+                            <input ref={input} />
+                            <button onClick={submitInput}>SUBMIT</button>
                           </div>
+                        </div>
+                      ) : (
+                        <div id="wrapperLoadingContainer">
+                          <div id="loadingContainer">
+                            <FaSpinner size="70px" />
+                          </div>
+                        </div>
+                      )}
+
+                      <div id="imagesWrapper">
+                        {images.map((image, index) => (
+                          <img
+                            key={index}
+                            className="image"
+                            src={`data:image/png;base64,${image}`}
+                            onClick={() => clickSubmitImage(index)}
+                          />
+                        ))}
+                      </div>
+                    </React.Fragment>
+                  ) : (
+                    // Vote phase
+                    <div id="imagesWrapper">
+                      {imageSubmissions.map((submissionData, indexOfSubmittedImage) => (
+                        <div className="specificImageToVoteForContainer votes">
+                          {allUsersVoted === true && (
+                            <div>
+                              <div>{getProperPhotoSubmitter(submissionData.userThatPicked.id)}</div>
+                              <div>{getProperPhotoRoundScore(submissionData.userThatPicked.id)}</div>
+                            </div>
+                          )}
+
+                          <img
+                            key={indexOfSubmittedImage}
+                            className="image"
+                            src={`data:image/png;base64,${submissionData.imagePicked}`}
+                            onClick={() => clickVoteForWinningPhoto(indexOfSubmittedImage)}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div id="notStartedContainer">
+                <div id="usersListContainer">
+                  {users.map((currentUser, index) => (
+                    <div key={currentUser.id}>
+                      <GoPerson size="100px" color={colorsNames[index % colorsNames.length]} />
+                      <div>
+                        {currentUser?.nickname ?? (
+                          <span id={myPrivateUniqueID.current === currentUser.id ? "myUsername" : undefined}>
+                            Guest {index + 1}
+                          </span>
                         )}
-
-                        <img
-                          key={indexOfSubmittedImage}
-                          className="image"
-                          src={`data:image/png;base64,${submissionData.imagePicked}`}
-                          onClick={() => clickVoteForWinningPhoto(indexOfSubmittedImage)}
-                        />
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div id="notStartedContainer">
-              <div id="usersListContainer">
-                {users.map((currentUser, index) => (
-                  <div key={currentUser.id}>
-                    <GoPerson size="100px" color={colorsNames[index % colorsNames.length]} />
-                    <div>{currentUser?.nickname ?? <span>Guest {index + 1}</span>}</div>
-                  </div>
-                ))}
-                {users.length < minimumNumberOfPlayersToStartGame && (
-                  <React.Fragment>
-                    {new Array(minimumNumberOfPlayersToStartGame - users.length).fill().map((curr, index) => (
-                      <div key={uuid()} style={{ opacity: "0.2" }}>
-                        <GoPerson size="100px" />
-                        <div>{nth(users.length + index + 1)} player</div>
-                      </div>
-                    ))}
-                  </React.Fragment>
-                )}
-              </div>
+                    </div>
+                  ))}
+                  {users.length < minimumNumberOfPlayersToStartGame && (
+                    <React.Fragment>
+                      {new Array(minimumNumberOfPlayersToStartGame - users.length).fill().map((curr, index) => (
+                        <div key={uuid()} style={{ opacity: "0.2" }}>
+                          <GoPerson size="100px" />
+                          <div>{nth(users.length + index + 1)} player</div>
+                        </div>
+                      ))}
+                    </React.Fragment>
+                  )}
+                </div>
 
-              <button onClick={startNewRound} id="startGameButton">
-                <SiLitiengine size="22px" />
-                <div>Start Game</div>
-              </button>
-            </div>
-          )}
-
-          <div>
-            {roundStarted === true && (
-              <div id="usersListContainer">
-                {users.map((currentUser, index) => (
-                  <div key={currentUser.id}>
-                    <GoPerson size="100px" color={colorsNames[index % colorsNames.length]} />
-                    <div>{currentUser?.nickname ?? <span>Guest {index + 1}</span>}</div>
-                  </div>
-                ))}
+                <button onClick={startNewRound} id="startGameButton">
+                  <SiLitiengine size="22px" />
+                  <div>Start Game</div>
+                </button>
               </div>
             )}
-            <div id="chatContainer">
-              <div id="chatMessagesContainer">
-                {chatMessages.map((messageData, index) => (
-                  <div key={index} className="messageInChat">
-                    <b
-                      style={{
-                        color: colorsNames[users.findIndex((currUser) => currUser.id === messageData.uniqueSenderID)],
-                      }}
-                    >
-                      {messageData.sender}
-                    </b>
-                    : {messageData.message}
-                  </div>
-                ))}
-              </div>
 
-              <div id="inputSendChatWrapper">
-                <input ref={chatInput} placeholder="Enter text message" onKeyDown={detectEnterForSending} />
-                <AiOutlineSend
-                  id="sendButtonChat"
-                  size="18px"
-                  onClick={sendMessageInChat}
-                  style={{ padding: "5px", cursor: "pointer" }}
-                />
+            <div>
+              <div id="chatContainer">
+                <div>Chat</div>
+                {roundStarted === true ? (
+                  <div id="chatMessagesListContainerWrapper">
+                    <div id="chatMessagesContainer">
+                      {chatMessages.map((messageData, index) => (
+                        <div key={index} className="messageInChat">
+                          <b
+                            style={{
+                              color: colorsNames[users.findIndex((currUser) => currUser.id === messageData.uniqueSenderID)],
+                            }}
+                          >
+                            {messageData.sender}
+                          </b>
+                          : {messageData.message}
+                        </div>
+                      ))}
+                    </div>
+                    <div id="usersListContainer">
+                      {users.map((currentUser, index) => (
+                        <div key={currentUser.id}>
+                          <GoPerson size="21px" color={colorsNames[index % colorsNames.length]} />
+                          <div>{currentUser?.nickname ?? <span>Guest {index + 1}</span>}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div id="chatMessagesContainer">
+                    {chatMessages.map((messageData, index) => (
+                      <div key={index} className="messageInChat">
+                        <b
+                          style={{
+                            color: colorsNames[users.findIndex((currUser) => currUser.id === messageData.uniqueSenderID)],
+                          }}
+                        >
+                          {messageData.sender}
+                        </b>
+                        : {messageData.message}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div id="inputSendChatWrapper">
+                  <input ref={chatInput} placeholder="Enter text message" onKeyDown={detectEnterForSending} />
+                  <AiOutlineSend
+                    id="sendButtonChat"
+                    size="18px"
+                    onClick={sendMessageInChat}
+                    style={{ padding: "5px", cursor: "pointer" }}
+                  />
+                </div>
               </div>
+              {roundStarted === false && (
+                <div id="shareContainer">
+                  <div onClick={clickedShareButton}>
+                    <BsFillShareFill size="18px" />
+                    <div>Share</div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
-      </main>
+      </div>
       <style jsx>{`
         #chatContainer {
           height: 200px;
@@ -526,15 +580,30 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          background: #1e1e1e;
-          border: 2px solid#ffec4859;
+          background: #373737;
+          border: 2px solid ${colorChatOutlines};
           border-radius: 15px;
           overflow: hidden;
+        }
+        #chatContainer > div:first-child {
+          text-align: center;
+          padding: 5px;
+          border-bottom: 2px solid ${colorChatOutlines};
         }
         #chatContainer input {
           width: 100%;
           padding: 5px 12px;
           color: #dedede;
+        }
+
+        #wrapperAll.started #chatMessagesListContainerWrapper {
+          display: flex;
+          justify-content: flex-end;
+        }
+
+        #wrapperAll.started #chatMessagesContainer {
+          flex: 1;
+          max-height: 123px;
         }
         #chatMessagesContainer {
           height: 100%;
@@ -542,44 +611,134 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
           padding: 5px;
           margin-bottom: 5px;
         }
+        #chatMessagesListContainerWrapper {
+          height: 100%;
+        }
 
-        #chatMessagesContainer::-webkit-scrollbar-track {
+        #chatMessagesContainer::-webkit-scrollbar-track,
+        #wrapperAll.started #usersListContainer::-webkit-scrollbar-track {
           -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
           background-color: #2a2a2a;
         }
 
-        #chatMessagesContainer::-webkit-scrollbar {
-          width: 12px;
+        #chatMessagesContainer::-webkit-scrollbar,
+        #wrapperAll.started #usersListContainer::-webkit-scrollbar {
+          width: 6px;
           background-color: #1a1a1a;
         }
 
-        #chatMessagesContainer::-webkit-scrollbar-thumb {
-          -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-          background-color: #7c7330;
+        #chatMessagesContainer::-webkit-scrollbar-thumb,
+        #wrapperAll.started #usersListContainer::-webkit-scrollbar-thumb {
+          background-color: #8a8a8a;
         }
 
-        main {
+        #main {
           color: #dedede;
           display: flex;
           justify-content: center;
           align-items: center;
           height: 100%;
+          flex-direction: column;
+        }
+        #proompterLogo :global(svg) {
+          position: relative;
+          top: 0;
+          transition: top 450ms;
+          z-index: 2;
+        }
+        #proompterLogo.started :global(svg) {
+          font-size: 100px !important;
+          position: absolute;
+          top: -50px;
+          left: 50%;
+          transform: translateX(-50%);
         }
         #wrapperAll {
           background: #3f3f3f;
-          width: 100%;
-          display: flex;
-          align-items: center;
+          width: 98%;
+          box-shadow: 0px 0px 3px #7e7e7e;
         }
+        #wrapperAll > div {
+          display: flex;
+          justify-content: space-around;
+          align-items: center;
+          margin-top: 30px;
+        }
+        #wrapperAll > div > div {
+          flex: 1;
+        }
+
         #wrapperAll.started {
-          height: calc(100vh - 45px - 15px - 30px);
-          margin-top: -15px;
+          height: calc(100vh - 62px);
+          margin-bottom: -40px;
+          position: relative;
+          z-index: 3;
+        }
+        #wrapperAll.started > div {
+          height: 100%;
+          margin-top: 0;
+        }
+        #wrapperAll.started #usersListContainer {
+          flex-direction: column;
+          width: fit-content;
+          max-width: 200px;
+          padding: 0px 4px;
+          border-left: 2px solid ${colorChatOutlines};
+          overflow-y: auto;
+          overflow-x: hidden;
+          max-height: 131px;
+          flex-wrap: nowrap;
+        }
+        #wrapperAll.started #inputSendChatWrapper {
+          border-top: 2px solid ${colorChatOutlines};
+        }
+        #wrapperAll.started #chatMessagesContainer {
+          padding-right: 0;
+        }
+        #wrapperAll.started #usersListContainer > div {
+          flex-direction: row;
+          margin-bottom: 10px;
+        }
+        #wrapperAll.started #usersListContainer > div :global(svg) {
+          width: 21px;
+          padding-right: 10px;
+          height: auto;
+        }
+
+        #shareContainer {
+          display: flex;
+          justify-content: flex-end !important;
+          margin-top: 10px;
+          transition: color 250ms;
+        }
+        #shareContainer > div {
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+        #shareContainer > div:hover {
+          color: #eece86;
+        }
+        #shareContainer > div > div {
+          padding: 10px;
         }
         #notStartedContainer {
-          flex: 1;
+          justify-content: space-around;
+          display: flex;
+          flex-direction: column;
+          align-self: stretch;
         }
         #notStartedContainer #usersListContainer {
           padding-top: 10px;
+        }
+        #usersListContainer #myUsername {
+          font-weight: bold;
+        }
+
+        #usersListContainer #myUsername::after {
+          content: " (you)";
+          font-size: 12px;
         }
 
         #startGameButton {
@@ -612,7 +771,7 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
         }
         #inputSendChatWrapper input {
           outline: none;
-          background: #1a1a1a;
+          background: #373737;
           border: 0;
         }
         #sendButtonChat {
@@ -718,6 +877,12 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
           width: 100%;
         }
         #usersThatPickedAnImage {
+        }
+
+        @media screen and (max-width: 1000px) {
+          #wrapperAll {
+            flex-direction: column;
+          }
         }
       `}</style>
     </Layout>
