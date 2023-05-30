@@ -16,7 +16,7 @@ import { SiLitiengine } from "react-icons/si";
 import { GoPerson } from "react-icons/go";
 import { BsFillShareFill } from "react-icons/bs";
 
-import { ProompterSVG } from "../../components/svg";
+// import { ProompterSVG } from "../../components/svg";
 
 const colorChatOutlines = "#adadad59";
 
@@ -381,7 +381,8 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
       {/* <button onClick={getImage}>GET IMAGE</button> */}
       <div id="main">
         <div id="proompterLogo" className={roundStarted === true ? "started" : "notStarted"}>
-          <ProompterSVG style={{ fontSize: 180 }} alt="Proompter" />
+          <img src="/proompter.png" alt="Proompter" width={450} />
+          {/* <ProompterSVG style={{ fontSize: 180 }} alt="Proompter" /> */}
         </div>
 
         <div id="wrapperAll" className={roundStarted === true ? "started" : undefined}>
@@ -640,16 +641,18 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
           height: 100%;
           flex-direction: column;
         }
-        #proompterLogo :global(svg) {
+        #proompterLogo img {
           position: relative;
           top: 0;
-          transition: top 450ms;
+          padding: 40px;
+          transition: top 450ms, width 450ms;
           z-index: 2;
         }
-        #proompterLogo.started :global(svg) {
-          font-size: 100px !important;
+        #proompterLogo.started img {
+          width: 150px !important;
           position: absolute;
-          top: -50px;
+          padding: 0;
+          top: 13px;
           left: 50%;
           transform: translateX(-50%);
         }
@@ -699,7 +702,7 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
           flex-direction: row;
           margin-bottom: 10px;
         }
-        #wrapperAll.started #usersListContainer > div :global(svg) {
+        #wrapperAll.started #usersListContainer > div img {
           width: 21px;
           padding-right: 10px;
           height: auto;

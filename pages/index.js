@@ -1,14 +1,11 @@
 import Head from "next/head";
-import Image from "next/image";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import Layout from "../components/layout";
 
-import { ProompterSVG } from "../components/svg";
-
 import { MdStart, MdSearch } from "react-icons/md";
 // import ParticlesComponent from "../components/ParticlesComponent";
-
+// import ProompterLogo from "../components/svg/proompter.png";
 // import proompterSVG from "./../public/proompter.svg";
 
 export default function Home({ socket }) {
@@ -35,10 +32,11 @@ export default function Home({ socket }) {
       <div id="wrapperHomepage">
         {/* <ParticlesComponent /> */}
         <div className="title">
-          {/* <Image src="/proompter.png" alt="Proompter" width={322} height={215} style={{ paddingRight: "7px" }} /> */}
+          <img src="/proompter.png" alt="Proompter" width={550} style={{ padding: "20px" }} />
           {/* <img src={proompterSVG} alt="Your SVG" /> */}
           {/* <div>Proompter</div> */}
-          <ProompterSVG style={{ fontSize: 300 }} alt="Proompter" />
+          {/* <img src={ProompterLogo} /> */}
+          {/* <ProompterSVG style={{ fontSize: 300 }} alt="Proompter" /> */}
         </div>
 
         <div>
@@ -62,13 +60,11 @@ export default function Home({ socket }) {
 
         @keyframes flashSlide {
           from {
-            top: -305px;
-            left: 0;
+            left: -25%;
             opacity: 1;
           }
           to {
-            top: 150px;
-            left: 305px;
+            left: 120%;
             opacity: 0;
           }
         }
@@ -89,10 +85,10 @@ export default function Home({ socket }) {
           content: "";
           background-color: #acacac24;
           width: 30px;
-          height: 150%;
+          height: 170%;
           position: absolute;
-          top: -305px;
-          left: 0;
+          top: -34%;
+          left: -25%;
           transform: rotate(45deg);
           box-shadow: 0 0 1px 1px #f7f7f7;
         }

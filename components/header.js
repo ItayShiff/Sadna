@@ -45,7 +45,6 @@ const Header = () => {
           {isHomepageNow === false ? (
             <Link href="/" className={styles.customLink}>
               <BsFillHouseFill size="20px" />
-              {/* <Image src="/homepage.png" alt="homepage" width={18} height={18} style={{ paddingRight: "7px" }} /> */}
               <div>Homepage</div>
             </Link>
           ) : (
