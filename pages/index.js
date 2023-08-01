@@ -13,7 +13,10 @@ export default function Home({ socket }) {
 
   useEffect(() => {
     socket.on("createdRoomSuccessfully", (room) => {
-      router.push(`/room/${room.users[0].id}`);
+      setTimeout(() => {
+        console.log("Pushed");
+        router.push(`/room/${room.users[0].id}`);
+      }, 3000);
     });
   }, []);
 
