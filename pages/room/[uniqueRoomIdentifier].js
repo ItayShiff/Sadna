@@ -401,10 +401,19 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
                     </button>
                   )}
 
-                  {images.length !== 0 && <div>Choose your favorite image</div>}
-                  {allUsersSubmittedImage === true && <div>Now choose a winner</div>}
+                  {images.length !== 0 && winnersData.length === 0 && (
+                    <React.Fragment>
+                      {allUsersSubmittedImage === false ? (
+                        <div className="alignAndBold">Choose your favorite image</div>
+                      ) : (
+                        <div className="alignAndBold">Now choose a winner</div>
+                      )}
+                    </React.Fragment>
+                  )}
 
-                  <div id="yourGivenWords">Your given words are</div>
+                  <div id="yourGivenWords" className="alignAndBold">
+                    Your given words are
+                  </div>
                   <div id="randomWordsWrapper">
                     {listOfRandomWordsToBeShown.map((randomWord) => (
                       <div key={randomWord} className="randomWord">
@@ -528,7 +537,6 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
                         ))}
                       </div>
                     )}
-                    {allUsersVoted === false && <div>Not all users voted yet</div>}
                   </div>
                 </div>
               )}
@@ -712,9 +720,10 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
         }
         #wrapperAll.started.generatedImages > div {
           flex-direction: row;
+          justify-content: space-around;
         }
 
-        #yourGivenWords {
+        .alignAndBold {
           text-align: center;
           font-weight: bold;
         }
@@ -876,7 +885,7 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
 
         #randomWordsWrapper {
           display: flex;
-          justify-content: space-around;
+          justify-content: center;
           align-items: space-around;
         }
         .randomWord {
@@ -946,6 +955,10 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
         #startedContainer {
           width: 100%;
           margin-bottom: 20px;
+        }
+
+        #wrapperAll.started.generatedImages #startedContainer {
+          width: unset;
         }
         #usersThatPickedAnImage > div {
           padding: 5px;
