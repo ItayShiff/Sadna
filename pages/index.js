@@ -2,7 +2,7 @@ import Head from "next/head";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import Layout from "../components/layout";
-
+import { toast } from "react-toastify";
 import { MdStart, MdSearch } from "react-icons/md";
 // import ParticlesComponent from "../components/ParticlesComponent";
 // import ProompterLogo from "../components/svg/proompter.png";
@@ -45,7 +45,7 @@ export default function Home({ socket }) {
             <div>Create New Room</div>
           </button>
 
-          <button className="button" onClick={() => alert("Not available yet")}>
+          <button className="button" onClick={() => toast.error("Not available yet")}>
             <MdSearch size="22px" />
             <div>Join Opened Room</div>
           </button>

@@ -8,6 +8,7 @@ import nouns from "../../components/utils/nouns";
 import verbs from "../../components/utils/verbs";
 
 import { uuid } from "uuidv4";
+import { toast } from "react-toastify";
 
 import { FaSpinner } from "react-icons/fa";
 import Layout from "../../components/layout";
@@ -255,7 +256,7 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
 
   const startNewRound = () => {
     if (users.length < minimumNumberOfPlayersToStartGame) {
-      alert(`Room must have at least ${minimumNumberOfPlayersToStartGame} users in order to start the game`);
+      toast.error(`Room must have at least ${minimumNumberOfPlayersToStartGame} users in order to start the game`);
       return;
     }
 
@@ -269,7 +270,7 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
   // 2. loading animation
   const submitInput = async () => {
     // if (isSubmittedAlready.current === true) {
-    //   alert("You already submitted");
+    //   toast("You already submitted");
     //   return;
     // }
 
@@ -287,17 +288,17 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
 
       setIsLoadingImagesGeneration(false);
       setImages(response.data.images);
-      alert("success");
+      toast("success");
     } catch (err) {
       console.log("Possibly Wrong Room ID");
       console.log(err);
-      alert("Invalid request");
+      toast.error("Invalid request");
     }
   };
 
   const clickSubmitImage = (indexOfImage) => {
     if (userPickedAnImageAlready.current === true) {
-      alert("You submitted already an image");
+      toast.error("You submitted already an image");
       return;
     }
 
@@ -309,7 +310,7 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
 
   const clickVoteForWinningPhoto = (indexOfImage) => {
     if (userVotedAlready.current === true) {
-      alert("You already submitted your vote");
+      toast.error("You already submitted your vote");
       return;
     }
 
@@ -317,7 +318,7 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
       (submissionData) => submissionData.userThatPicked.id === socket.id
     );
     if (indexOfImage === IDofOwnerWhosePhotoIVoted) {
-      alert("You cannot choose your own submission.");
+      toast.error("You cannot choose your own submission.");
       return;
     }
 
@@ -361,10 +362,10 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
   const clickedShareButton = () => {
     navigator.clipboard.writeText(`https://proompter.onrender.com/room/${uniqueRoomIdentifier}`).then(
       () => {
-        alert("Link copied to clipboard!");
+        toast("Link copied to clipboard!");
       },
       () => {
-        alert("Failed to copy");
+        toast.error("Failed to copy");
       }
     );
   };
@@ -385,21 +386,25 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
           {/* <ProompterSVG style={{ fontSize: 180 }} alt="Proompter" /> */}
         </div>
 
-        <div id="wrapperAll" className={roundStarted === true ? "started" : undefined}>
+        <div
+          id="wrapperAll"
+          className={roundStarted === true ? (images.length === 0 ? "started" : "started generatedImages") : undefined}
+        >
           <div>
             {roundStarted === true ? (
               <div id="startedContainer">
-                <div id="usersThatPickedAnImage">
-                  {imageSubmissions.map((submissionData, index) => (
-                    <div key={submissionData.userThatPicked.id}>
-                      {submissionData.userThatPicked?.nickname ?? <span>Guest {index + 1}</span>} picked an image
-                    </div>
-                  ))}
-                </div>
-
                 <div>
-                  {winnersData.length !== 0 && <button onClick={startNewRound}>Start Game</button>}
+                  {winnersData.length !== 0 && (
+                    <button onClick={startNewRound} id="startGameButton">
+                      <SiLitiengine size="22px" />
+                      <div>Start Game</div>
+                    </button>
+                  )}
 
+                  {images.length !== 0 && <div>Choose your favorite image</div>}
+                  {allUsersSubmittedImage === true && <div>Now choose a winner</div>}
+
+                  <div id="yourGivenWords">Your given words are</div>
                   <div id="randomWordsWrapper">
                     {listOfRandomWordsToBeShown.map((randomWord) => (
                       <div key={randomWord} className="randomWord">
@@ -423,9 +428,11 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
                       {isLoadingImagesGeneration === false ? (
                         <div id="promptWrapperContainer">
                           <div id="promptWrapper">
-                            <div>Write a prompt for Craiyon that includes the words you were given:</div>
-                            <input ref={input} />
-                            <button onClick={submitInput}>SUBMIT</button>
+                            <div>Write a prompt for Craiyon that includes the given words:</div>
+                            <input ref={input} id="inputPrompt" placeholder="Enter here" />
+                            <button onClick={submitInput} id="startGameButton">
+                              Submit
+                            </button>
                           </div>
                         </div>
                       ) : (
@@ -506,6 +513,25 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
             )}
 
             <div>
+              {roundStarted === true && (
+                <div id="titleStatsDuringGameContainer">
+                  <div id="titleStatsDuringGame">Stats during game</div>
+                  <div id="usersThatPickedAnImage">
+                    {imageSubmissions.length === 0 ? (
+                      <div>Nobody picked an image yet</div>
+                    ) : (
+                      <div>
+                        {imageSubmissions.map((submissionData, index) => (
+                          <div key={submissionData.userThatPicked.id}>
+                            {submissionData.userThatPicked?.nickname ?? <span>Guest {index + 1}</span>} picked an image
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {allUsersVoted === false && <div>Not all users voted yet</div>}
+                  </div>
+                </div>
+              )}
               <div id="chatContainer">
                 <div>Chat</div>
                 {roundStarted === true ? (
@@ -667,8 +693,9 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
           align-items: center;
           margin-top: 30px;
         }
-        #wrapperAll > div > div {
-          flex: 1;
+
+        #wrapperAll > div > div:first-child {
+          max-height: calc(100vh - 62px);
         }
 
         #wrapperAll.started {
@@ -680,7 +707,27 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
         #wrapperAll.started > div {
           height: 100%;
           margin-top: 0;
+          flex-direction: column;
+          justify-content: center;
         }
+        #wrapperAll.started.generatedImages > div {
+          flex-direction: row;
+        }
+
+        #yourGivenWords {
+          text-align: center;
+          font-weight: bold;
+        }
+
+        #wrapperAll.started.generatedImages #randomWordsWrapper {
+          margin-bottom: 20px;
+        }
+
+        #wrapperAll.started.generatedImages #promptWrapperContainer,
+        #wrapperAll.started.generatedImages #yourGivenWords {
+          display: none;
+        }
+
         #wrapperAll.started #usersListContainer {
           flex-direction: column;
           width: fit-content;
@@ -783,21 +830,24 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
         }
 
         #winnersWrapper {
-          background: #eaeaea;
+          background: #2a2a2a;
           text-align: center;
-          border: 2px solid;
+          border: 2px solid #6f6f6f;
+          margin-bottom: 20px;
         }
 
         #imagesWrapper {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
+          grid-template-columns: repeat(3, 160px);
+          justify-content: center;
           grid-gap: 20px;
         }
 
         #imagesWrapper img {
           height: 100%;
           width: 100%;
-          border: 10px solid #1d1d1d;
+          border: 3px solid #1d1d1d;
+          box-sizing: border-box;
           margin: 0 auto;
           cursor: pointer;
           transition: border-color 0.4s linear;
@@ -813,16 +863,17 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
           position: relative;
         }
         .specificImageToVoteForContainer > div {
-          background: #c5c5c5e6;
+          background: #444444e6;
           position: absolute;
-          left: calc(50% + 10px);
+          left: 50%;
           top: 50%;
           transform: translate(-50%, -50%);
           padding: 20px;
-          width: calc(100% - 39px);
+          width: calc(100% - 40px);
           text-align: center;
           font-weight: bold;
         }
+
         #randomWordsWrapper {
           display: flex;
           justify-content: space-around;
@@ -875,12 +926,44 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
           padding: 10px;
           width: 80%;
           margin: 0 auto;
+          text-align: center;
         }
         #promptWrapperContainer {
           width: 100%;
         }
-        #usersThatPickedAnImage {
+
+        #inputPrompt {
+          background: unset;
+          outline: none;
+          border: 0;
+          border-bottom: 2px solid #969696;
+          display: block;
+          width: 90%;
+          color: #d7d7d7;
+          margin: 15px auto;
         }
+
+        #startedContainer {
+          width: 100%;
+          margin-bottom: 20px;
+        }
+        #usersThatPickedAnImage > div {
+          padding: 5px;
+        }
+
+        #titleStatsDuringGame {
+          background: #515151;
+          padding: 5px;
+        }
+        #titleStatsDuringGameContainer {
+          text-align: center;
+          border: 1px solid #adadad59;
+          // padding-bottom: 30px;
+        }
+
+        // #titleStatsDuringGameContainer.notStarted {
+        //   .notStarted
+        // }
 
         @media screen and (max-width: 1000px) {
           #wrapperAll {

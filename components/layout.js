@@ -1,6 +1,8 @@
 import React from "react";
 import Header from "./header";
 import ParticlesComponent from "./ParticlesComponent";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Layout = ({ children }) => {
   console.log("UPADTED!!!");
@@ -8,6 +10,7 @@ const Layout = ({ children }) => {
   return (
     <>
       <Header />
+      <ToastContainer />
       <main>
         <ParticlesComponent />
         {children}

@@ -7,6 +7,7 @@ import { MdEdit } from "react-icons/md";
 import { ImCancelCircle } from "react-icons/im";
 import { AiOutlineSave } from "react-icons/ai";
 import styles from "../styles/header.module.css";
+import { toast } from "react-toastify";
 
 const Header = () => {
   const input = useRef();
@@ -34,7 +35,7 @@ const Header = () => {
       setNickname(input.current.value);
       closeModalNicknameChoosing();
     } else {
-      alert("Invalid nickname");
+      toast.error("Invalid nickname");
     }
   };
 
