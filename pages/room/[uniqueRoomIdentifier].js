@@ -331,7 +331,7 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
 
   const getProperPhotoRoundScore = (uniqueIDofUserThatSubmittedThisImage) => {
     const IDofUserInUsersList = users.findIndex((currentUser) => currentUser.id === uniqueIDofUserThatSubmittedThisImage);
-    return users[IDofUserInUsersList].roundScore;
+    return users[IDofUserInUsersList]?.roundScore;
   };
 
   const getProperPhotoSubmitter = (uniqueIDofUserThatSubmittedThisImage) => {
@@ -862,10 +862,10 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
           transition: border-color 0.4s linear;
         }
         #imagesWrapper img.pickedThisImage {
-          border: 10px solid #ff6060;
+          border: 10px solid #ffb360;
         }
         .specificImageToVoteForContainer.votes.pickedThisImage img {
-          border: 10px solid #ff6060 !important;
+          border: 10px solid #ffb360 !important;
         }
 
         .specificImageToVoteForContainer {
