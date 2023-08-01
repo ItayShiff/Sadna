@@ -38,24 +38,6 @@ module.exports = function (server) {
       console.log(roomsList[socket.id]);
 
       socket.emit("createdRoomSuccessfully", roomsList[socket.id]);
-
-      setTimeout(() => {
-        console.log("After 500ms");
-        const isExisting = roomsList[socket.id] !== undefined;
-        console.log(`isExisting ${isExisting}`);
-      }, 500);
-
-      setTimeout(() => {
-        console.log("After 2000ms");
-        const isExisting = roomsList[socket.id] !== undefined;
-        console.log(`isExisting ${isExisting}`);
-      }, 2000);
-
-      setTimeout(() => {
-        console.log("After 4000ms");
-        const isExisting = roomsList[socket.id] !== undefined;
-        console.log(`isExisting ${isExisting}`);
-      }, 4000);
     });
 
     socket.on("joinedRoom", (uniqueRoomIdentifier, nicknameOfUserThatJoined) => {
