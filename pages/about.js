@@ -1,7 +1,5 @@
-import Link from "next/link";
 import React from "react";
 import Layout from "../components/layout";
-import ParticlesComponent from "../components/ParticlesComponent";
 import Image from "next/image";
 
 import styles from "../styles/about.module.css";
@@ -95,6 +93,7 @@ function About() {
         @media screen and (max-width: 1200px) {
           #wrapperForCentering {
             display: block;
+            margin-top: 45px;
           }
           #wrapperHomepage {
             background: #303030;
