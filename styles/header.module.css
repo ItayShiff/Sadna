@@ -1,21 +1,31 @@
 .customLink {
-    color: #cfcfcf;
-    display: flex; 
-    margin-right: 5px;
-    text-decoration: unset;
+  color: #cfcfcf;
+  display: flex;
+  margin-right: 5px;
+  text-decoration: unset;
 }
 
-.nicknameButton, .customLink {
-    transition: color 350ms;
+.nicknameButton,
+.customLink {
+  transition: color 350ms;
 }
 
-.customLink:hover :not(div), .nicknameButton:hover :not(div) {
-    color: rgb(254, 255, 183);
+.customLink:hover :not(div),
+.nicknameButton:hover :not(div) {
+  color: rgb(254, 255, 183);
 }
 
-.nicknameButton { 
-    cursor: pointer;
+.nicknameButton {
+  cursor: pointer;
 }
-.nicknameButton div, .customLink div {
-    margin: 0 10px;
+.nicknameButton div,
+.customLink div {
+  margin: 0 10px;
+}
+
+@media screen and (max-width: 750px) {
+  .nicknameButton div,
+  .customLink div {
+    margin: 0 5px;
+  }
 }

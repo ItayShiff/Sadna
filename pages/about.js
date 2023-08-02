@@ -1,12 +1,15 @@
 import React from "react";
 import Layout from "../components/layout";
 import Image from "next/image";
-
+import Head from "next/head";
 import styles from "../styles/about.module.css";
 
 function About() {
   return (
     <Layout>
+      <Head>
+        <title>About Us | Proompter</title>
+      </Head>
       <div id="wrapperForCentering">
         <div id="wrapperHomepage">
           <div>

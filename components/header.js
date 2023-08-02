@@ -46,7 +46,7 @@ const Header = () => {
           {isHomepageNow === false ? (
             <Link href="/" className={styles.customLink}>
               <BsFillHouseFill size="20px" />
-              <div>Homepage</div>
+              <div>Home</div>
             </Link>
           ) : (
             <Link href="/about" className={styles.customLink}>
@@ -110,6 +110,12 @@ const Header = () => {
           }
           to {
             opacity: 1;
+          }
+        }
+
+        @media screen and (max-width: 750px) {
+          header > div {
+            padding: 0px 10px;
           }
         }
 

@@ -7,7 +7,8 @@ import Link from "next/link";
 import nouns from "../../components/utils/nouns";
 import verbs from "../../components/utils/verbs";
 
-import { uuid } from "uuidv4";
+// import { uuid } from "uuidv4";
+import { v4 as uuid } from "uuid";
 import { toast } from "react-toastify";
 
 import { FaSpinner } from "react-icons/fa";
@@ -282,13 +283,13 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
       setIsLoadingImagesGeneration(true);
 
       // Development:
-      // const response = await axios.post("http://localhost:3000/api/images/generate", body);
+      const response = await axios.post("http://localhost:3000/api/images/generate", body);
       // Production:
-      const response = await axios.post("https://proompter.onrender.com/api/images/generate", body);
+      // const response = await axios.post("https://proompter.onrender.com/api/images/generate", body);
 
       setIsLoadingImagesGeneration(false);
       setImages(response.data.images);
-      toast("success");
+      toast("Proompter: We got your prompt");
     } catch (err) {
       console.log("Possibly Wrong Room ID");
       console.log(err);
@@ -305,6 +306,8 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
     userPickedAnImageAlready.current = true;
     console.log("CLICKED AN IMAGE", indexOfImage);
     document.getElementById("imagesWrapper").children[indexOfImage].classList.add("pickedThisImage");
+    // document.getElementById("imagesWrapper").children[indexOfImage].classList.add("pickedThisImage");
+    document.querySelector(".alignAndBold").innerText = "You have made a choice\nPlease await the decisions of others";
     socket.emit("imagePicked", uniqueRoomIdentifier, images[indexOfImage]);
   };
 
@@ -380,7 +383,7 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
       </Head>
 
       {/* <button onClick={getImage}>GET IMAGE</button> */}
-      <div id="main">
+      <div id="main" className={images.length !== 0 ? "generatedImages" : undefined}>
         <div id="proompterLogo" className={roundStarted === true ? "started" : "notStarted"}>
           <img src="/proompter.png" alt="Proompter" width={450} />
           {/* <ProompterSVG style={{ fontSize: 180 }} alt="Proompter" /> */}
@@ -397,7 +400,7 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
                   {winnersData.length !== 0 && (
                     <button onClick={startNewRound} id="startGameButton">
                       <SiLitiengine size="22px" />
-                      <div>Start Game</div>
+                      <div>Start New Game</div>
                     </button>
                   )}
 
@@ -529,13 +532,26 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
                     {imageSubmissions.length === 0 ? (
                       <div>Nobody picked an image yet</div>
                     ) : (
-                      <div>
-                        {imageSubmissions.map((submissionData, index) => (
-                          <div key={submissionData.userThatPicked.id}>
-                            {submissionData.userThatPicked?.nickname ?? <span>Guest {index + 1}</span>} picked an image
+                      <React.Fragment>
+                        {allUsersSubmittedImage === false ? (
+                          <div>
+                            {imageSubmissions.map((submissionData, index) => (
+                              <div key={submissionData.userThatPicked.id}>
+                                {submissionData.userThatPicked?.nickname ?? <span>Guest {index + 1}</span>} picked an image
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
+                        ) : (
+                          <React.Fragment>
+                            {winnersData.length === 0 && (
+                              <div>
+                                <div>Initial vote completed</div>
+                                <div>Waiting for others to choose a winner</div>
+                              </div>
+                            )}
+                          </React.Fragment>
+                        )}
+                      </React.Fragment>
                     )}
                   </div>
                 </div>
@@ -674,6 +690,9 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
           align-items: center;
           height: 100%;
           flex-direction: column;
+        }
+        #proompterLogo {
+          text-align: center;
         }
         #proompterLogo img {
           position: relative;
@@ -978,9 +997,55 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
         //   .notStarted
         // }
 
-        @media screen and (max-width: 1000px) {
-          #wrapperAll {
+        @media screen and (max-width: 1175px) {
+          #main.generatedImages,
+          #wrapperAll.started {
+            height: auto !important;
+          }
+          #wrapperAll.started {
+            margin-top: 55px;
+            margin-bottom: 15px;
+          }
+          #wrapperLoadingContainer {
+            margin: 20px;
+          }
+          #wrapperAll.started.generatedImages > div {
             flex-direction: column;
+          }
+        }
+
+        @media screen and (max-width: 560px) {
+          #imagesWrapper {
+            grid-gap: 10px;
+            grid-template-columns: repeat(3, 1fr);
+          }
+          .alignAndBold {
+            margin-top: 12px;
+          }
+          #wrapperAll.started.generatedImages #randomWordsWrapper {
+            margin-bottom: 12px;
+          }
+        }
+
+        @media screen and (max-width: 1000px) {
+          #wrapperAll > div {
+            flex-direction: column;
+          }
+          #wrapperAll > div > div:last-child {
+            width: 100%;
+          }
+          #chatContainer {
+            width: calc(100% - 12px);
+            margin: 5px;
+          }
+
+          #proompterLogo img {
+            width: 75%;
+            margin-top: 20px;
+            padding: 20px;
+          }
+          #proompterLogo.started img {
+            top: -9px;
           }
         }
       `}</style>
@@ -994,9 +1059,9 @@ export async function getServerSideProps(context) {
 
     console.log(uniqueRoomIdentifier);
     // Development:
-    // const response = await axios.get(`http://localhost:3000/api/room/${uniqueRoomIdentifier}`); // API request using Axios
+    const response = await axios.get(`http://localhost:3000/api/room/${uniqueRoomIdentifier}`); // API request using Axios
     // Production:
-    const response = await axios.get(`https://proompter.onrender.com/api/room/${uniqueRoomIdentifier}`); // API request using Axios
+    // const response = await axios.get(`https://proompter.onrender.com/api/room/${uniqueRoomIdentifier}`); // API request using Axios
 
     console.log("Got successfully", response.data);
     return {

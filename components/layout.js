@@ -20,6 +20,7 @@ const Layout = ({ children }) => {
           position: relative;
           background: #303030;
           height: 100vh;
+          min-height: 100vh;
         }
       `}</style>
     </>
