@@ -30,13 +30,8 @@ export default function Home({ socket }) {
       </Head>
 
       <div id="wrapperHomepage">
-        {/* <ParticlesComponent /> */}
         <div className="title">
           <img src="/proompter.png" alt="Proompter" width={550} style={{ padding: "20px" }} />
-          {/* <img src={proompterSVG} alt="Your SVG" /> */}
-          {/* <div>Proompter</div> */}
-          {/* <img src={ProompterLogo} /> */}
-          {/* <ProompterSVG style={{ fontSize: 300 }} alt="Proompter" /> */}
         </div>
 
         <div>
@@ -130,6 +125,18 @@ export default function Home({ socket }) {
           #wrapperHomepage > div:last-child {
             flex-direction: column;
             width: 90% !important;
+          }
+          .title img {
+            width: 93%;
+          }
+          .title::after {
+            left: -29%;
+          }
+        }
+
+        @media only screen and (max-width: 500px) {
+          .title img {
+            width: 90%;
           }
         }
       `}</style>
