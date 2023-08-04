@@ -290,9 +290,9 @@ function uniqueRoomIdentifier({ roomExisting, usersListWhenRoomOpened, didGameAl
       setIsLoadingImagesGeneration(true);
 
       // Development:
-      const response = await axios.post("http://localhost:3000/api/images/generate", body);
+      // const response = await axios.post("http://localhost:3000/api/images/generate", body);
       // Production:
-      // const response = await axios.post("https://proompter.onrender.com/api/images/generate", body);
+      const response = await axios.post("https://proompter.onrender.com/api/images/generate", body);
 
       setIsLoadingImagesGeneration(false);
       setImages(response.data.images);
@@ -1078,9 +1078,9 @@ export async function getServerSideProps(context) {
 
     console.log(uniqueRoomIdentifier);
     // Development:
-    const response = await axios.get(`http://localhost:3000/api/room/${uniqueRoomIdentifier}`); // API request using Axios
+    // const response = await axios.get(`http://localhost:3000/api/room/${uniqueRoomIdentifier}`); // API request using Axios
     // Production:
-    // const response = await axios.get(`https://proompter.onrender.com/api/room/${uniqueRoomIdentifier}`); // API request using Axios
+    const response = await axios.get(`https://proompter.onrender.com/api/room/${uniqueRoomIdentifier}`); // API request using Axios
 
     console.log("Got successfully", response.data);
     return {
