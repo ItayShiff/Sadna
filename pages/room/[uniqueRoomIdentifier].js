@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
 import socket from "../../components/socketio/socket";
@@ -47,11 +47,11 @@ const getRandomNoun = () => {
 const getRandomVerb = () => {
   return verbs[Math.floor(Math.random() * verbs.length)];
 };
-function uniqueRoomIdentifier({ roomExisting, usersListWhenRoomOpened, didGameAlreadyStartInitialValue }) {
+function uniqueRoomIdentifier({ roomExisting, usersListWhenRoomOpened }) {
   // console.log(roomExisting, roomName, usersListWhenRoomOpened, "\n -------- \n", props);
-  console.log(usersListWhenRoomOpened, didGameAlreadyStartInitialValue);
+  console.log(usersListWhenRoomOpened);
 
-  const [didGameStartAlready, setDidGameStartAlready] = useState(didGameAlreadyStartInitialValue); // set to true if joined while game already started, changes later to false when new game starts
+  const [didGameStartAlready, setDidGameStartAlready] = useState(false); // set to true if joined while game already started, changes later to false when new game starts
 
   if (roomExisting === false) {
     return (
@@ -122,8 +122,17 @@ function uniqueRoomIdentifier({ roomExisting, usersListWhenRoomOpened, didGameAl
 
   const myPrivateUniqueID = useRef();
 
-  // const isSubmittedAlready = useRef(false);
   const [isLoadingImagesGeneration, setIsLoadingImagesGeneration] = useState(false);
+
+  useLayoutEffect(() => {
+    socket.emit("didGameStartAlready", uniqueRoomIdentifier);
+    socket.on("didGameStartAlready", (value) => {
+      if (value === true) {
+        setDidGameStartAlready(true);
+        socket.off("didGameStartAlready");
+      }
+    });
+  }, []);
 
   useEffect(() => {
     if (roomExisting === false) {
@@ -160,10 +169,7 @@ function uniqueRoomIdentifier({ roomExisting, usersListWhenRoomOpened, didGameAl
 
     socket.on("winners", (winnersDataFromServer) => {
       setWinnersData(winnersDataFromServer);
-      if (didGameAlreadyStartInitialValue === true) {
-        setDidGameStartAlready(false);
-        resetStatesForNewRound();
-      }
+      setDidGameStartAlready(false);
     });
 
     // When user about to leave the room (using Esc or full reload) so it will run
@@ -203,12 +209,6 @@ function uniqueRoomIdentifier({ roomExisting, usersListWhenRoomOpened, didGameAl
 
   useEffect(() => {
     socket.on("newRoundStarted", (randomWordsFromServer) => {
-      // If started a new game from a game that finished
-      if (winnersData.length !== 0) {
-        resetStatesForNewRound();
-        console.log("Reset all states");
-      }
-
       setListOfRandomWordsToBeShown(randomWordsFromServer);
       setNewRoundStarted(true);
     });
@@ -267,6 +267,8 @@ function uniqueRoomIdentifier({ roomExisting, usersListWhenRoomOpened, didGameAl
       toast.error(`Room must have at least ${minimumNumberOfPlayersToStartGame} users in order to start the game`);
       return;
     }
+
+    resetStatesForNewRound();
 
     const randomNoun = getRandomNoun();
     const randomVerb = getRandomVerb();
@@ -1086,7 +1088,6 @@ export async function getServerSideProps(context) {
     return {
       props: {
         usersListWhenRoomOpened: response.data?.users,
-        didGameAlreadyStartInitialValue: response.data?.gameStarted ?? false,
       },
     };
   } catch (err) {

@@ -173,5 +173,11 @@ module.exports = function (server) {
     socket.on("messageSentInChat", (uniqueRoomIdentifier, nickname, uniqueSenderID, message) => {
       io.in(uniqueRoomIdentifier).emit("messageArrivedInChat", { sender: nickname, message: message, uniqueSenderID });
     });
+
+    socket.on("didGameStartAlready", (uniqueRoomIdentifier) => {
+      if (SingletonRoomsList.checkIfThisRoomExists(uniqueRoomIdentifier)) {
+        socket.emit("didGameStartAlready", roomsList[uniqueRoomIdentifier].gameStarted);
+      }
+    });
   });
 };
