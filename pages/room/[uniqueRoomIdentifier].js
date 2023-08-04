@@ -209,6 +209,7 @@ function uniqueRoomIdentifier({ roomExisting, usersListWhenRoomOpened }) {
 
   useEffect(() => {
     socket.on("newRoundStarted", (randomWordsFromServer) => {
+      resetStatesForNewRound();
       setListOfRandomWordsToBeShown(randomWordsFromServer);
       setNewRoundStarted(true);
     });
@@ -267,8 +268,6 @@ function uniqueRoomIdentifier({ roomExisting, usersListWhenRoomOpened }) {
       toast.error(`Room must have at least ${minimumNumberOfPlayersToStartGame} users in order to start the game`);
       return;
     }
-
-    resetStatesForNewRound();
 
     const randomNoun = getRandomNoun();
     const randomVerb = getRandomVerb();
