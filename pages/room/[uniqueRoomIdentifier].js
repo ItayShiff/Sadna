@@ -47,8 +47,11 @@ const getRandomNoun = () => {
 const getRandomVerb = () => {
   return verbs[Math.floor(Math.random() * verbs.length)];
 };
-function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, props) {
+function uniqueRoomIdentifier({ roomExisting, usersListWhenRoomOpened, didGameAlreadyStartInitialValue }) {
   // console.log(roomExisting, roomName, usersListWhenRoomOpened, "\n -------- \n", props);
+  console.log(usersListWhenRoomOpened, didGameAlreadyStartInitialValue);
+
+  const [didGameStartAlready, setDidGameStartAlready] = useState(didGameAlreadyStartInitialValue); // set to true if joined while game already started, changes later to false when new game starts
 
   if (roomExisting === false) {
     return (
@@ -157,6 +160,10 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
 
     socket.on("winners", (winnersDataFromServer) => {
       setWinnersData(winnersDataFromServer);
+      if (didGameAlreadyStartInitialValue === true) {
+        setDidGameStartAlready(false);
+        resetStatesForNewRound();
+      }
     });
 
     // When user about to leave the room (using Esc or full reload) so it will run
@@ -283,9 +290,9 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
       setIsLoadingImagesGeneration(true);
 
       // Development:
-      // const response = await axios.post("http://localhost:3000/api/images/generate", body);
+      const response = await axios.post("http://localhost:3000/api/images/generate", body);
       // Production:
-      const response = await axios.post("https://proompter.onrender.com/api/images/generate", body);
+      // const response = await axios.post("https://proompter.onrender.com/api/images/generate", body);
 
       setIsLoadingImagesGeneration(false);
       setImages(response.data.images);
@@ -517,10 +524,22 @@ function uniqueRoomIdentifier({ roomExisting, users: usersListWhenRoomOpened }, 
                   )}
                 </div>
 
-                <button onClick={startNewRound} id="startGameButton">
-                  <SiLitiengine size="22px" />
-                  <div>Start Game</div>
-                </button>
+                {didGameStartAlready === false ? (
+                  <button onClick={startNewRound} id="startGameButton">
+                    <SiLitiengine size="22px" />
+                    <div>Start Game</div>
+                  </button>
+                ) : (
+                  <button
+                    id="startGameButton"
+                    onClick={() => {
+                      toast.error("Game has not finished yet");
+                    }}
+                  >
+                    <SiLitiengine size="22px" />
+                    <div>Wait Until Game Is Over To Start A New Game</div>
+                  </button>
+                )}
               </div>
             )}
 
@@ -1059,13 +1078,16 @@ export async function getServerSideProps(context) {
 
     console.log(uniqueRoomIdentifier);
     // Development:
-    // const response = await axios.get(`http://localhost:3000/api/room/${uniqueRoomIdentifier}`); // API request using Axios
+    const response = await axios.get(`http://localhost:3000/api/room/${uniqueRoomIdentifier}`); // API request using Axios
     // Production:
-    const response = await axios.get(`https://proompter.onrender.com/api/room/${uniqueRoomIdentifier}`); // API request using Axios
+    // const response = await axios.get(`https://proompter.onrender.com/api/room/${uniqueRoomIdentifier}`); // API request using Axios
 
     console.log("Got successfully", response.data);
     return {
-      props: response.data,
+      props: {
+        usersListWhenRoomOpened: response.data?.users ?? [],
+        didGameAlreadyStartInitialValue: response.data?.gameStarted,
+      },
     };
   } catch (err) {
     console.log("YES we are in error now");

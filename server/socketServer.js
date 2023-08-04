@@ -31,6 +31,7 @@ module.exports = function (server) {
             roundScore: 0,
           },
         ],
+        gameStarted: false,
       };
 
       socket.join(socket.id);
@@ -93,6 +94,8 @@ module.exports = function (server) {
         currentUser.roundScore = 0;
         return currentUser;
       });
+      roomsList[uniqueRoomIdentifier].gameStarted = true;
+      roomsList[uniqueRoomIdentifier].numbersOfPlayersInCurrentGame = roomsList[uniqueRoomIdentifier].users.length; // Can change if a user joins after the game started
 
       io.in(uniqueRoomIdentifier).emit("newRoundStarted", randomWordsToSend);
     });
@@ -121,7 +124,7 @@ module.exports = function (server) {
       }
 
       // If all users submitted image
-      if (numberOfUsersThePickedImage === roomsList[uniqueRoomIdentifier].users.length) {
+      if (numberOfUsersThePickedImage === roomsList[uniqueRoomIdentifier].numbersOfPlayersInCurrentGame) {
         io.in(uniqueRoomIdentifier).emit("allUsersSubmittedImage");
       }
     });
@@ -144,7 +147,7 @@ module.exports = function (server) {
       }
 
       // if all users voted
-      if (numberOfUsersThatVoted === roomsList[uniqueRoomIdentifier].users.length) {
+      if (numberOfUsersThatVoted === roomsList[uniqueRoomIdentifier].numbersOfPlayersInCurrentGame) {
         io.in(uniqueRoomIdentifier).emit("allUsersVoted", roomsList[uniqueRoomIdentifier].users); // Updated users array with roundScore of each user
 
         // winnersData will hold in each item the user data that won.
@@ -162,6 +165,7 @@ module.exports = function (server) {
         }
 
         // const winnerData = roomsList[uniqueRoomIdentifier].users
+        roomsList[uniqueRoomIdentifier].gameStarted = false;
         io.in(uniqueRoomIdentifier).emit("winners", winnersData);
       }
     });

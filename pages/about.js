@@ -27,7 +27,7 @@ function About() {
                   <div>Daniel Senderovych</div>
                 </div>
                 <div>
-                  <Image src="/ITAY.jpg" alt="Itay Shiff" width="350" height="350" className={styles.imagesDevelopers} />
+                  <Image src="/itay.jpeg" alt="Itay Shiff" width="350" height="350" className={styles.imagesDevelopers} />
                   <div>Itay Shiff</div>
                 </div>
                 <div>
