@@ -386,7 +386,7 @@ function uniqueRoomIdentifier({ roomExisting, usersListWhenRoomOpened, didGameAl
   return (
     <Layout>
       <Head>
-        <title>{users[0].nickname ? `${users[0].nickname}'s room` : "Guest's room"}</title>
+        <title>{users[0]?.nickname ? `${users[0].nickname}'s room` : "Guest's room"}</title>
       </Head>
 
       {/* <button onClick={getImage}>GET IMAGE</button> */}
@@ -1085,8 +1085,8 @@ export async function getServerSideProps(context) {
     console.log("Got successfully", response.data);
     return {
       props: {
-        usersListWhenRoomOpened: response.data?.users ?? [],
-        didGameAlreadyStartInitialValue: response.data?.gameStarted,
+        usersListWhenRoomOpened: response.data?.users,
+        didGameAlreadyStartInitialValue: response.data?.gameStarted ?? false,
       },
     };
   } catch (err) {
